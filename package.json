@@ -1,0 +1,39 @@
+{
+  "name": "algo-update-mcp",
+  "version": "1.0.0",
+  "description": "Marie Haynes Algorithm & AI Search Changes MCP Server",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc && mkdir -p dist/data && cp -r src/data/ dist/data/",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "tsx test/test_mcp.ts"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "seo",
+    "google-algorithm-updates",
+    "ai-search",
+    "marie-haynes",
+    "okf"
+  ],
+  "author": "Marie Haynes Consulting Inc.",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "yaml": "^2.7.0",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.5",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

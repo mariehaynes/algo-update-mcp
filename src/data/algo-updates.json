@@ -1,0 +1,184 @@
+[
+  {
+    "id": "2026-09-02-gemini-3-8-flash-in-search-ai-mode",
+    "title": "Gemini 3.8 Flash Available in Model Selector in Search AI Mode",
+    "date": "2026-09-02",
+    "year": 2026,
+    "category": "AI Mode & Gemini",
+    "platform": "Google Search",
+    "impact": "High",
+    "status": "Confirmed",
+    "summary": "Google released Gemini 3.8 Flash, making it available as a selectable option in the AI Mode model dropdown for paid subscribers. A new model option in AI Mode functions much like an algorithm update: the model's advanced reasoning allows it to directly resolve complex queries with fewer clicks to external sites, while simultaneously recalibrating which websites it predicts will provide the most valuable deep-dive source material.",
+    "html": "<strong>September 2, 2026</strong>: <a href=\"https://x.com/rmstein/status/2095176293751124182?s=20\"><strong>Google released Gemini 3.8 Flash, making it available as a selectable option in the AI Mode model dropdown for paid subscribers</strong></a>. A new model option in AI Mode functions much like an algorithm update: the model's advanced reasoning allows it to directly resolve complex queries with fewer clicks to external sites, while simultaneously recalibrating which websites it predicts will provide the most valuable deep-dive source material.",
+    "sources": [
+      "https://x.com/rmstein/status/2095176293751124182?s=20",
+      "https://community.mariehaynes.com/posts/106814142"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2026-08-31-google-updates-ucp-specification",
+    "title": "Google Updates Universal Commerce Protocol (UCP) Specification",
+    "date": "2026-08-31",
+    "year": 2026,
+    "category": "Universal Commerce Protocol",
+    "platform": "Google Search",
+    "impact": "Moderate",
+    "status": "Confirmed",
+    "summary": "Google published major updates to the Universal Commerce Protocol (UCP) specification, refining how e-commerce sites declare inventory, checkout workflows, and machine-readable product schemas for agentic shopping.",
+    "html": "<strong>August 31, 2026</strong>: <a href=\"https://community.mariehaynes.com/posts/106701112\"><strong>Google published major updates to the Universal Commerce Protocol (UCP) specification</strong></a>, refining how e-commerce sites declare inventory, checkout workflows, and machine-readable product schemas for agentic shopping.",
+    "sources": [
+      "https://community.mariehaynes.com/posts/106701112"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2026-08-19-gsc-direct-controls-generative-ai",
+    "title": "Google Search Console Adds Direct Controls for Generative AI Visibility",
+    "date": "2026-08-19",
+    "year": 2026,
+    "category": "Search Algorithm Update",
+    "platform": "Google Search",
+    "impact": "Moderate",
+    "status": "Confirmed",
+    "summary": "Google introduced direct controls in Search Console for Generative AI visibility. Webmasters can now monitor and set explicit preferences for how their content is summarized and utilized across Google's generative search features and AI Overviews.",
+    "html": "<strong>August 19, 2026</strong>: <a href=\"https://support.google.com/webmasters/answer/16908024?hl=en-GB\"><strong>Google introduced direct controls in Search Console for Generative AI visibility</strong></a>. Webmasters can now monitor and set explicit preferences for how their content is summarized and utilized across Google's generative search features and AI Overviews.",
+    "sources": [
+      "https://support.google.com/webmasters/answer/16908024?hl=en-GB"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2026-08-19-interactive-visuals-simulations-in-ai-overviews",
+    "title": "Interactive Visuals & Simulations Rolling Out in AI Overviews",
+    "date": "2026-08-19",
+    "year": 2026,
+    "category": "AI Overviews",
+    "platform": "Google Search",
+    "impact": "Moderate",
+    "status": "Confirmed",
+    "summary": "Interactive visuals and live code-generated simulations began rolling out directly within AI Overviews, expanding beyond AI Mode. Searchers can interact with dynamic charts, calculations, and simulations inside the SERP without needing to click into full AI Mode.",
+    "html": "<strong>August 19, 2026</strong>: <a href=\"https://community.mariehaynes.com/posts/106201296\"><strong>Interactive visuals and live code-generated simulations began rolling out directly within AI Overviews</strong></a>, expanding beyond AI Mode. Searchers can interact with dynamic charts, calculations, and simulations inside the SERP without needing to click into full AI Mode.",
+    "sources": [
+      "https://community.mariehaynes.com/posts/106201296"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2026-08-18-google-august-2026-spam-update",
+    "title": "Google Launched the August 2026 Spam Update",
+    "date": "2026-08-18",
+    "year": 2026,
+    "category": "Google Spam Update",
+    "platform": "Google Search",
+    "impact": "High",
+    "status": "Confirmed",
+    "summary": "Google launched the August 2026 Spam Update, completing on August 21. Google announced this as a global update affecting all regions and languages. This was an impactful update. There are many reports of sites suffering deindexing of AI generated content done at scale. Here is a good post from Glenn Gabe with his observations and case studies.",
+    "html": "<strong>August 18–21, 2026</strong>: <a href=\"https://developers.google.com/search/docs/appearance/spam-updates\"><strong>Google launched the August 2026 Spam Update</strong></a>, completing on August 21. Google announced this as a global update affecting all regions and languages. This was an impactful update. There are many reports of sites suffering deindexing of AI generated content done at scale. Here is a good post from Glenn Gabe with <a href=\"https://www.gsqi.com/marketing-blog/august-2026-google-spam-update-case-studies/\">his observations and case studies</a>.",
+    "sources": [
+      "https://developers.google.com/search/docs/appearance/spam-updates",
+      "https://www.gsqi.com/marketing-blog/august-2026-google-spam-update-case-studies/"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2026-08-18-drop-in-reddit-citations",
+    "title": "Sharp Drop in Reddit Citations Across ChatGPT and AI Mode",
+    "date": "2026-08-18",
+    "year": 2026,
+    "category": "AI Overviews",
+    "platform": "ChatGPT / OpenAI",
+    "impact": "High",
+    "status": "Observed",
+    "summary": "Data from Promptwatch showed that ChatGPT has almost entirely stopped citing Reddit. AI Mode is also showing significantly fewer Reddit responses, dropping to just 1.5% of monitored answers over the past 7 days (while AI Overviews citations have decreased only slightly). This represents a notable shift in how generative search engines weight forum and UGC discussions for informational queries.",
+    "html": "<strong>August 18, 2026</strong>: <a href=\"https://promptwatch.com/data/reddit-citations-are-dropping-in-chatgpt\"><strong>Data from Promptwatch showed that ChatGPT has almost entirely stopped citing Reddit</strong></a>. AI Mode is also showing significantly fewer Reddit responses, dropping to just 1.5% of monitored answers over the past 7 days (while AI Overviews citations have decreased only slightly). This represents a notable shift in how generative search engines weight forum and UGC discussions for informational queries.",
+    "sources": [
+      "https://promptwatch.com/data/reddit-citations-are-dropping-in-chatgpt",
+      "https://community.mariehaynes.com/posts/106136096"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2026-08-18-gemini-in-chrome-autobrowse-android",
+    "title": "Gemini in Chrome Autobrowse Rolls Out on Android in the US",
+    "date": "2026-08-18",
+    "year": 2026,
+    "category": "AI Mode & Gemini",
+    "platform": "Google Search",
+    "impact": "Moderate",
+    "status": "Confirmed",
+    "summary": "Gemini in Chrome with Autobrowse rolled out to Android users in the US. Autobrowse allows Gemini to autonomously navigate websites, complete multi-step tasks, book tickets, and fill out forms on behalf of the user, marking a major milestone in agentic web navigation.",
+    "html": "<strong>August 18, 2026</strong>: <a href=\"https://community.mariehaynes.com/posts/106142716\"><strong>Gemini in Chrome with Autobrowse rolled out to Android users in the US</strong></a>. Autobrowse allows Gemini to autonomously navigate websites, complete multi-step tasks, book tickets, and fill out forms on behalf of the user, marking a major milestone in agentic web navigation.",
+    "sources": [
+      "https://community.mariehaynes.com/posts/106142716"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2026-08-14-gemini-3-7-flash-in-ai-mode",
+    "title": "Gemini 3.7 Flash Rolling Out in AI Mode for Google AI Subscribers",
+    "date": "2026-08-14",
+    "year": 2026,
+    "category": "AI Mode & Gemini",
+    "platform": "Google Search",
+    "impact": "High",
+    "status": "Confirmed",
+    "summary": "Gemini 3.7 Flash rolled out to power AI Mode for paid Google AI subscribers. Model updates feel like algorithm updates because they improve the quality of AI answers, meaning fewer clicks to some websites. And also, they can improve Google's predictions of which websites a user wants to use to go deeper, which can improve Search performance for some sites with original insight and data.",
+    "html": "<strong>August 14, 2026</strong>: <a href=\"https://x.com/rmstein/status/2088325481599009146?s=20\"><strong>Gemini 3.7 Flash rolled out to power AI Mode for paid Google AI subscribers</strong></a>. Model updates feel like algorithm updates because they improve the quality of AI answers, meaning fewer clicks to some websites. And also, they can improve Google's predictions of which websites a user wants to use to go deeper, which can improve Search performance for some sites with original insight and data.",
+    "sources": [
+      "https://x.com/rmstein/status/2088325481599009146?s=20"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2026-07-21-ai-overviews-rollout-in-france",
+    "title": "AI Overviews Rollout in France Causes Sharp Click Drops",
+    "date": "2026-07-21",
+    "year": 2026,
+    "category": "AI Overviews",
+    "platform": "Google Search",
+    "impact": "High",
+    "status": "Observed",
+    "summary": "AI Overviews launched in France, triggering noticeable organic click drops for informational publishers. Search Console tracking across multiple French properties showed a sudden decline in CTR as AI Overviews resolved quick-answer queries at the top of the SERP. Here is a tweet from Lily Ray showing a drastic drop in clicks for a French site that coincides with this day.",
+    "html": "<strong>July 21, 2026</strong>: <a href=\"https://community.mariehaynes.com/posts/106815305\"><strong>AI Overviews launched in France, triggering noticeable organic click drops for informational publishers</strong></a>. Search Console tracking across multiple French properties showed a sudden decline in CTR as AI Overviews resolved quick-answer queries at the top of the SERP. Here is a <a href=\"https://x.com/lilyraynyc/status/2095163079856095565?s=20\">tweet from Lily Ray showing a drastic drop in clicks for a French site</a> that coincides with this day.",
+    "sources": [
+      "https://x.com/lilyraynyc/status/2095163079856095565?s=20",
+      "https://community.mariehaynes.com/posts/106815305"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2026-05-21-new-core-update-went-live",
+    "title": "New core update went live",
+    "date": "2026-05-21",
+    "year": 2026,
+    "category": "Google Core Update",
+    "platform": "Google Search",
+    "impact": "High",
+    "status": "Confirmed",
+    "summary": "May 21, 2026: New core update went live. It will take up to 2 weeks to complete. Google linked to their standard guidance on core updates. Although nothing has changed in this document, it is worth noting that just a few days ago they published new guidance on ranking in the AI features in Search which includes recommendations to provide a unique point of view, focus on non-commodity content, avoid scaled content, organize content in a way that helps your readers and add high quality images and video.",
+    "html": "<strong>May 21, 2026</strong>: <a href=\"https://status.search.google.com/incidents/wdAXJk6LRRihEjpzEeWE\"><strong>New core update went live</strong></a>. It will take up to 2 weeks to complete. Google linked to their <a href=\"https://developers.google.com/search/docs/appearance/core-updates\">standard guidance on core updates</a>. Although nothing has changed in this document, it is worth noting that just a few days ago they published <a href=\"https://developers.google.com/search/docs/fundamentals/ai-optimization-guide\">new guidance on ranking in the AI features in Search</a> which includes recommendations to provide a unique point of view, focus on non-commodity content, avoid scaled content, organize content in a way that helps your readers and add high quality images and video.",
+    "sources": [
+      "https://status.search.google.com/incidents/wdAXJk6LRRihEjpzEeWE",
+      "https://developers.google.com/search/docs/appearance/core-updates",
+      "https://developers.google.com/search/docs/fundamentals/ai-optimization-guide"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2018-11-04-november-4-5-2018",
+    "title": "November 4: 5, 2018",
+    "date": "2018-11-04",
+    "year": 2018,
+    "category": "Search Algorithm Update",
+    "platform": "Google Search",
+    "impact": "Moderate",
+    "status": "Confirmed",
+    "summary": "November 4-5, 2018 – This was likely a small core quality update. While we do think that it is related to the August 1/September 27 changes, most of the sites that we saw make improvements or declines on this day were not medical in nature.",
+    "html": "<strong>November 4-5, 2018</strong>&nbsp;– This was likely a&nbsp;<a href=\"https://www.mariehaynes.com/newsletter/episode-56/#toc-0\" rel=\"noopener noreferrer\">small core quality update</a>. While we do think that it is related to the August 1/September 27 changes, most of the sites that we saw make improvements or declines on this day were not medical in nature.",
+    "sources": [
+      "https://www.mariehaynes.com/newsletter/episode-56/#toc-0"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  }
+]
