@@ -1340,6 +1340,7 @@ Please merge the new "marie-haynes-algo" server into my file. Ensure all JSON br
 <footer>
   <p style="margin-bottom: 0.75rem; font-weight: 700; color: var(--brand-deep-purple); font-size: 1.05rem;">Maintained by Marie Haynes Consulting Inc.</p>
   <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 1.2rem; font-size: 0.95rem;">
+    <a href="https://github.com/mariehaynes/algo-update-mcp" target="_blank" rel="noopener">⭐ GitHub Open Source</a>
     <a href="https://mariehaynes.com/newsletter" target="_blank" rel="noopener">📬 Marie's Newsletter</a>
     <a href="https://mariehaynes.com/join" target="_blank" rel="noopener">💬 Join Marie's AI & Search Community</a>
     <a href="https://mariehaynes.com/contact" target="_blank" rel="noopener">✉️ Contact Marie</a>
