@@ -52,7 +52,24 @@ const server = app.listen(TEST_PORT, '127.0.0.1', async () => {
     assert.ok(apiRes.updates.length === 3, 'Array length must be 3');
     console.log('✅ Endpoint GET /api/updates passed');
 
-    console.log('\n🎉 ALL HTTP & WEBMCP ENDPOINT TESTS PASSED!');
+    // 5. Test REST API /api/stats (Telemetry & Tallies)
+    const statsResStr = await get(`http://127.0.0.1:${TEST_PORT}/api/stats`);
+    const statsRes = JSON.parse(statsResStr);
+    assert.ok(typeof statsRes.totalCalls === 'number', 'totalCalls must be a number');
+    assert.ok(statsRes.totalCalls >= 1, 'Total calls should be at least 1 after /api/updates');
+    assert.ok(statsRes.byTransport.api >= 1, 'byTransport.api should be at least 1');
+    assert.ok(statsRes.byTool, 'byTool object must be present');
+    console.log(`✅ Endpoint GET /api/stats passed (totalCalls: ${statsRes.totalCalls})`);
+
+    // 6. Test HTML Stats Dashboard /stats
+    const statsHtml = await get(`http://127.0.0.1:${TEST_PORT}/stats`);
+    assert.ok(statsHtml.includes('Live Usage Dashboard'), 'Must contain Dashboard heading');
+    assert.ok(statsHtml.includes('Zero-Knowledge Guarantee'), 'Must contain Privacy guarantee');
+    assert.ok(statsHtml.includes('Tool Popularity'), 'Must contain Tool Popularity panel');
+    assert.ok(statsHtml.includes('G-2N5XDDYHFL'), 'Must include GA4 measurement tag');
+    console.log('✅ Endpoint GET /stats (Dashboard HTML) passed');
+
+    console.log('\n🎉 ALL HTTP, STATS & WEBMCP ENDPOINT TESTS PASSED!');
     server.close();
     process.exit(0);
   } catch (err) {

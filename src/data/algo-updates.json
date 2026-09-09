@@ -1,5 +1,55 @@
 [
   {
+    "id": "2026-09-08-openai-launches-chatgpt-images-2-5-with-new-sketch-feature",
+    "title": "OpenAI Launches ChatGPT Images 2.5 with New Sketch Feature",
+    "date": "2026-09-08",
+    "year": 2026,
+    "category": "ChatGPT / OpenAI",
+    "platform": "ChatGPT / OpenAI",
+    "impact": "Observational",
+    "status": "Confirmed",
+    "summary": "OpenAI released ChatGPT Images 2.5 - faster, sharper, smarter. Also you can use sketch to draw in ChatGPT and it will turn it into an image for you.",
+    "html": "<strong>2026-09-08</strong>: <strong>OpenAI Launches ChatGPT Images 2.5 with New Sketch Feature</strong>. OpenAI released ChatGPT Images 2.5 - faster, sharper, smarter. Also you can use sketch to draw in ChatGPT and it will turn it into an image for you.",
+    "sources": [
+      "https://openai.com/index/introducing-chatgpt-images-2-5/",
+      "https://community.mariehaynes.com/posts/107075900"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2026-09-08-significant-search-ranking-volatility-detected-on-september-2",
+    "title": "Significant Search Ranking Volatility Detected on September 2",
+    "date": "2026-09-08",
+    "year": 2026,
+    "category": "Search Algorithm Update",
+    "platform": "Google Search",
+    "impact": "Moderate",
+    "status": "Confirmed",
+    "summary": "I am noticing significant ranking or traffic changes on September 2 for many different sites I monitor.\nNo official update was announced. On Sep 3 Gemini 3.8 Flash came out and was announced to be available in AI Mode, but these ranking changes don't seem limited to AI Mode.\n\nI think it's possible that the new Gemini 3.8 Flash model changed the capabilities of AI models involved in Search systems such as RankBrain, but this is a guess. Still, noting this here as there are a large number of sites with update-like movement.",
+    "html": "<strong>2026-09-08</strong>: <strong>Significant Search Ranking Volatility Detected on September 2</strong>. I am noticing significant ranking or traffic changes on September 2 for many different sites I monitor.\nNo official update was announced. On Sep 3 Gemini 3.8 Flash came out and was announced to be available in AI Mode, but these ranking changes don't seem limited to AI Mode.\n\nI think it's possible that the new Gemini 3.8 Flash model changed the capabilities of AI models involved in Search systems such as RankBrain, but this is a guess. Still, noting this here as there are a large number of sites with update-like movement.",
+    "sources": [
+      "https://community.mariehaynes.com/posts/107076315"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
+    "id": "2026-09-03-openai-launches-gpt-6-astra-calling-it-the-dawn-of-the-agi-era",
+    "title": "OpenAI Launches GPT-6 Astra calling it The Dawn of the AGI Era?",
+    "date": "2026-09-03",
+    "year": 2026,
+    "category": "ChatGPT / OpenAI",
+    "platform": "ChatGPT / OpenAI",
+    "impact": "High",
+    "status": "Confirmed",
+    "summary": "OpenAI has released GPT-6 Astra. It's really good on computer use, browsing, software engineering, cybersecurity, science and professional work. All of the paid ChatGPT plans have access. \n\nIt scores 99.9% on the ARC-AGI-3 benchmark. This doesn't mean it's AGI, but it scores better than other models. The next closest is Opus 5 at 30.2%",
+    "html": "<strong>2026-09-03</strong>: <strong>OpenAI Launches GPT-6 Astra calling it The Dawn of the AGI Era?</strong>. OpenAI has released GPT-6 Astra. It's really good on computer use, browsing, software engineering, cybersecurity, science and professional work. All of the paid ChatGPT plans have access. \n\nIt scores 99.9% on the ARC-AGI-3 benchmark. This doesn't mean it's AGI, but it scores better than other models. The next closest is Opus 5 at 30.2%",
+    "sources": [
+      "https://openai.com/index/gpt-6-astra/",
+      "https://community.mariehaynes.com/posts/106879190"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
     "id": "2026-09-02-gemini-3-8-flash-in-search-ai-mode",
     "title": "Gemini 3.8 Flash Available in Model Selector in Search AI Mode",
     "date": "2026-09-02",

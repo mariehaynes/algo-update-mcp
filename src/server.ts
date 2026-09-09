@@ -14,6 +14,8 @@ import {
   ATTRIBUTION_FOOTER
 } from './tools.js';
 import { MHC_LOGO_BASE64 } from './logoData.js';
+import { recordToolUsage, getUsageStats, TransportType } from './telemetry.js';
+import { renderStatsHtml } from './statsHtml.js';
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3005;
@@ -22,7 +24,7 @@ app.use(cors());
 app.use(express.json());
 
 // Factory function to create a new MCP server instance per connection (enables multi-client SSE)
-function createMcpServer(): McpServer {
+function createMcpServer(transport: TransportType = 'streamable_http'): McpServer {
   const server = new McpServer({
     name: "marie-haynes-algo-updates",
     version: "1.0.0"
@@ -38,6 +40,7 @@ function createMcpServer(): McpServer {
       category: z.string().optional().describe("Filter by category: e.g. 'Google Core Update', 'Google Spam Update', 'AI Mode & Gemini', 'AI Overviews', or 'all'")
     },
     async ({ limit, platform, category }) => {
+      recordToolUsage("get_latest_updates", transport);
       const result = getLatestUpdates({ limit, platform, category });
       return {
         content: [{
@@ -58,6 +61,7 @@ function createMcpServer(): McpServer {
       platform: z.string().optional().describe("Optional platform filter: 'Google Search', 'ChatGPT / OpenAI', or 'all'")
     },
     async ({ startDate, endDate, platform }) => {
+      recordToolUsage("get_updates_by_date_range", transport);
       const result = getUpdatesByDateRange({ startDate, endDate, platform });
       return {
         content: [{
@@ -79,6 +83,7 @@ function createMcpServer(): McpServer {
       limit: z.number().min(1).max(50).optional().describe("Maximum results to return (default: 15)")
     },
     async ({ query, category, platform, limit }) => {
+      recordToolUsage("search_updates", transport);
       const result = searchUpdates({ query, category, platform, limit });
       return {
         content: [{
@@ -95,6 +100,7 @@ function createMcpServer(): McpServer {
     "List all available update categories, platforms, and total counts in Marie Haynes' algorithm archive.",
     {},
     async () => {
+      recordToolUsage("get_all_categories", transport);
       const result = getAllCategories();
       return {
         content: [{
@@ -182,7 +188,7 @@ app.get('/sse', async (req, res) => {
   const transport = new SSEServerTransport('/messages', res);
   transports.set(transport.sessionId, transport);
 
-  const server = createMcpServer();
+  const server = createMcpServer('sse');
 
   req.on('close', async () => {
     console.log(`[SSE] Connection closed for session ${transport.sessionId}`);
@@ -218,7 +224,7 @@ app.post(['/messages', '/sse'], async (req, res) => {
 const streamableTransport = new StreamableHTTPServerTransport({
   sessionIdGenerator: undefined // Stateless mode: perfect for serverless Cloud Run
 });
-const streamableServer = createMcpServer();
+const streamableServer = createMcpServer('streamable_http');
 streamableServer.connect(streamableTransport).catch(err => {
   console.error("[StreamableHTTP] Error connecting to server:", err);
 });
@@ -271,6 +277,7 @@ app.get('/.well-known/mcp.json', (req, res) => {
 // Public REST API & JSON Feeds
 // ----------------------------------------------------
 app.get('/api/updates', (req, res) => {
+  recordToolUsage('api_updates', 'api');
   const { limit, platform, category, startDate, endDate, query } = req.query;
 
   if (query) {
@@ -300,6 +307,18 @@ app.get('/api/updates', (req, res) => {
 app.get('/updates.json', (req, res) => {
   const updates = loadUpdates();
   res.json(updates);
+});
+
+// ----------------------------------------------------
+// Public Usage Statistics & Analytics Dashboard
+// ----------------------------------------------------
+app.get('/api/stats', (req, res) => {
+  res.json(getUsageStats());
+});
+
+app.get('/stats', (req, res) => {
+  const stats = getUsageStats();
+  res.send(renderStatsHtml(stats));
 });
 
 app.get('/openapi.json', (req, res) => {
@@ -390,6 +409,7 @@ app.get('/logo.jpg', (req, res) => {
 app.get('/', (req, res) => {
   const updates = loadUpdates();
   const spotlightUpdates = updates.slice(0, 3);
+  const stats = getUsageStats();
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -399,12 +419,12 @@ app.get('/', (req, res) => {
   <title>Marie Haynes' Algorithm & AI Search Updates MCP</title>
   <meta name="description" content="Use Marie Haynes' algorithm update list directly in Claude Desktop, Antigravity, Cursor, and AI agents via Model Context Protocol (MCP).">
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-N29R7CSGFK"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2N5XDDYHFL"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-N29R7CSGFK');
+    gtag('config', 'G-2N5XDDYHFL');
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -835,6 +855,14 @@ app.get('/', (req, res) => {
   <span class="badge">Model Context Protocol (MCP)</span>
   <h1>Algorithm & AI Search Updates</h1>
   <p>You can now use my <a href="https://www.mariehaynes.com/resources/algo-changes-and-more/" target="_blank" rel="noopener" style="color: var(--brand-purple); font-weight: 600; text-decoration: underline;">list of Google algorithm updates and changes to AI Search</a> via MCP so you can access it via any AI system that offers MCP access. <a href="javascript:void(0)" onclick="toggleSetupBox(true)" style="color: var(--brand-orange); font-weight: 600; text-decoration: underline;">Click here to expand the step-by-step setup guides</a> to connect my MCP server to Claude, Antigravity, or wherever you use MCP.</p>
+  <div style="margin-top: 1.25rem;">
+    <a href="/stats" style="display: inline-flex; align-items: center; gap: 8px; background: #f7eefc; border: 1px solid #e5cfee; border-radius: 999px; padding: 6px 18px; font-size: 0.88rem; color: var(--brand-purple); font-weight: 600; text-decoration: none; transition: all 0.2s ease;">
+      <span>📊</span>
+      <span><strong>${stats.totalCalls.toLocaleString()}</strong> queries served anonymously to AI agents</span>
+      <span style="color: #cbb4d9;">•</span>
+      <span style="color: var(--brand-orange); font-weight: 700;">View Usage Dashboard &rarr;</span>
+    </a>
+  </div>
 </header>
 
 <div class="container">
@@ -1340,6 +1368,8 @@ Please merge the new "marie-haynes-algo" server into my file. Ensure all JSON br
 <footer>
   <p style="margin-bottom: 0.75rem; font-weight: 700; color: var(--brand-deep-purple); font-size: 1.05rem;">Maintained by Marie Haynes Consulting Inc.</p>
   <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 1.2rem; font-size: 0.95rem;">
+    <a href="/stats">📊 Usage Dashboard</a>
+    <a href="/api/stats" target="_blank">⚡ JSON Stats Feed</a>
     <a href="https://github.com/mariehaynes/algo-update-mcp" target="_blank" rel="noopener">⭐ GitHub Open Source</a>
     <a href="https://mariehaynes.com/newsletter" target="_blank" rel="noopener">📬 Marie's Newsletter</a>
     <a href="https://mariehaynes.com/join" target="_blank" rel="noopener">💬 Join Marie's AI & Search Community</a>
@@ -1405,11 +1435,15 @@ window.addEventListener('DOMContentLoaded', () => {
   res.send(html);
 });
 
-// Start server unless imported in test environment
-if (process.env.NODE_ENV !== 'test') {
+// Start server if run directly (and not imported in test environment)
+const entryFile = process.argv[1] ? path.basename(process.argv[1]) : '';
+const isDirectRun = entryFile === 'server.ts' || entryFile === 'server.js';
+
+if (isDirectRun && process.env.NODE_ENV !== 'test') {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Marie Haynes Algo Update MCP Server listening on port ${PORT}`);
     console.log(`👉 Web Portal: http://localhost:${PORT}/`);
+    console.log(`👉 Usage Dashboard: http://localhost:${PORT}/stats`);
     console.log(`👉 MCP SSE Endpoint: http://localhost:${PORT}/sse`);
     console.log(`👉 WebMCP Spec: http://localhost:${PORT}/.well-known/mcp.json`);
     console.log(`👉 REST API Feed: http://localhost:${PORT}/api/updates`);

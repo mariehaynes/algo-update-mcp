@@ -14,6 +14,8 @@ Key capabilities:
   - **Backwards-Compatible HTTP+SSE (`/sse`)**: Preserves legacy SSE and POST message handling so existing Claude Desktop (`supergateway`) and SSE clients continue working seamlessly.
   - **WebMCP Auto-Discovery (`/.well-known/mcp.json`)**: Built-in support for emerging in-browser agent discovery.
   - **Interactive Web Explorer (`/`)**: A sleek, responsive web view adhering to MHC brand guidelines (`#f15a25`, `#5c2882`, `#662d91`, `#333333`, Poppins & Noto Sans) featuring real-time search, prompt advice, expandable setup guides, and an FAQ.
+  - **Privacy-First Live Telemetry & Usage Dashboard (`/stats` & `/api/stats`)**: 100% anonymous volume counting strictly adhering to Marie's privacy promise. Zero prompts, search queries, IPs, or client URLs are ever logged. Displays live tool popularity, protocol breakdown, and 14-day activity.
+  - **GA4 Measurement Protocol**: Integrates server-side event tracking (`mcp_tool_usage`) directly with Google Analytics using measurement ID `G-2N5XDDYHFL`.
   - **Open REST Feed (`/api/updates` & `/updates.json`)**: Public JSON feed for developers and custom tool builders.
 
 ## 2. How the technical architecture works
@@ -21,6 +23,11 @@ The system is architected as an Open Knowledge Format (OKF) ecosystem:
 
 - **Sample OKF Dataset (`sample-okf/`)**: Contains sample human-readable Markdown files with YAML frontmatter demonstrating the Open Knowledge Format structure.
 - **Lookup Index (`src/data/algo-updates.json`)**: In-memory JSON dataset of sample updates for instant local development and testing. (In production, Marie's hosted server at `algo.mariehaynes.com` serves the full 15-year verified archive of 590+ updates).
+- **Anonymous Telemetry & Analytics (`src/telemetry.ts` & `src/statsHtml.ts`)**:
+  - In-memory aggregate counters persisted to `data/usage-stats.json`.
+  - Strictly anonymous volume counting: only tallies tool executions and transport methods.
+  - Asynchronous GA4 Measurement Protocol dispatcher sending `mcp_tool_usage` events when `GA4_API_SECRET` is configured.
+  - Brand-compliant web dashboard rendered at `/stats` and raw JSON API feed at `/api/stats`.
 - **MCP Server Engine (`src/server.ts` & `src/tools.ts`)**: Built on the official `@modelcontextprotocol/sdk` (v1.30.0+) and Express.
   - **Dual Transports**:
     - `StreamableHTTPServerTransport` mounted at `/mcp` (and `/v1/mcp`) for modern stateless streaming on Google Cloud Run.
@@ -62,6 +69,13 @@ npm run build
 ```bash
 npm start
 ```
+
+### Environment Variables
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `PORT` | HTTP server port | `3005` (or `8080` in Docker) |
+| `GA4_MEASUREMENT_ID` | Google Analytics 4 Measurement ID | `G-2N5XDDYHFL` |
+| `GA4_API_SECRET` | Measurement Protocol API secret (from GA4 Admin &rarr; Data Streams) | _(Optional)_ |
 
 ### Connecting to Claude Desktop
 Open Claude Desktop &rarr; **Settings** (`Cmd + ,` on Mac or `Ctrl + ,` on Windows) &rarr; **Developer** tab &rarr; click **Edit Config**.

@@ -7,7 +7,9 @@
     "build": "tsc && mkdir -p dist/data && cp -r src/data/ dist/data/",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
-    "test": "tsx test/test_mcp.ts"
+    "test": "tsx test/test_mcp.ts && tsx test/test_server.ts",
+    "test:tools": "tsx test/test_mcp.ts",
+    "test:server": "tsx test/test_server.ts"
   },
   "keywords": [
     "mcp",

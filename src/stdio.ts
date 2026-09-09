@@ -8,6 +8,7 @@ import {
   getAllCategories,
   ATTRIBUTION_FOOTER
 } from './tools.js';
+import { recordToolUsage } from './telemetry.js';
 
 const server = new McpServer({
   name: "marie-haynes-algo-updates",
@@ -23,6 +24,7 @@ server.tool(
     category: z.string().optional()
   },
   async ({ limit, platform, category }) => {
+    recordToolUsage("get_latest_updates", "stdio");
     const res = getLatestUpdates({ limit, platform, category });
     return { content: [{ type: "text", text: JSON.stringify(res, null, 2) }] };
   }
@@ -37,6 +39,7 @@ server.tool(
     platform: z.string().optional()
   },
   async ({ startDate, endDate, platform }) => {
+    recordToolUsage("get_updates_by_date_range", "stdio");
     const res = getUpdatesByDateRange({ startDate, endDate, platform });
     return { content: [{ type: "text", text: JSON.stringify(res, null, 2) }] };
   }
@@ -52,6 +55,7 @@ server.tool(
     limit: z.number().optional()
   },
   async ({ query, category, platform, limit }) => {
+    recordToolUsage("search_updates", "stdio");
     const res = searchUpdates({ query, category, platform, limit });
     return { content: [{ type: "text", text: JSON.stringify(res, null, 2) }] };
   }
@@ -62,6 +66,7 @@ server.tool(
   "List all available update categories and platforms.",
   {},
   async () => {
+    recordToolUsage("get_all_categories", "stdio");
     const res = getAllCategories();
     return { content: [{ type: "text", text: JSON.stringify({ ...res, attribution: ATTRIBUTION_FOOTER.trim() }, null, 2) }] };
   }
