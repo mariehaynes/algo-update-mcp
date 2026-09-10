@@ -178,7 +178,7 @@ console.log('  ✅ Test 7 Passed!\n');
 console.log('Test 8: Harmonized Gemini 3.8 Flash release reference in September 2 volatility');
 const sept2Record = searchUpdates({ query: 'Significant Search Ranking Volatility Detected on September 2' });
 assert.ok(sept2Record.count >= 1, 'Should find September 2 volatility record');
-assert.ok(sept2Record.updates[0].summary.includes('Around September 2–3, Gemini 3.8 Flash rolled out'), 'Summary should say "Around September 2–3, Gemini 3.8 Flash rolled out"');
+assert.ok(sept2Record.updates[0].summary.includes('On September 2, Gemini 3.8 Flash came out'), 'Summary should say "On September 2, Gemini 3.8 Flash came out"');
 console.log('  ✅ Test 8 Passed!\n');
 
 console.log('🎉 ALL 8 TEST SUITES PASSED FLAWLESSLY!');
