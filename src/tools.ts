@@ -338,8 +338,11 @@ export function searchUpdates(params: {
 
 export function getAllCategories(): {
   categories: string[];
+  categoryCounts: Record<string, number>;
   platforms: string[];
+  platformCounts: Record<string, number>;
   statuses: string[];
+  statusCounts: Record<string, number>;
   totalUpdates: number;
 } {
   const updates = loadUpdates();
@@ -347,10 +350,25 @@ export function getAllCategories(): {
   const platforms = Array.from(new Set(updates.map(u => u.platform))).sort();
   const statuses = Array.from(new Set(updates.map(u => u.status))).sort();
 
+  const categoryCounts: Record<string, number> = {};
+  for (const c of categories) categoryCounts[c] = 0;
+  for (const u of updates) categoryCounts[u.category] = (categoryCounts[u.category] || 0) + 1;
+
+  const platformCounts: Record<string, number> = {};
+  for (const p of platforms) platformCounts[p] = 0;
+  for (const u of updates) platformCounts[u.platform] = (platformCounts[u.platform] || 0) + 1;
+
+  const statusCounts: Record<string, number> = {};
+  for (const s of statuses) statusCounts[s] = 0;
+  for (const u of updates) statusCounts[u.status] = (statusCounts[u.status] || 0) + 1;
+
   return {
     categories,
+    categoryCounts,
     platforms,
+    platformCounts,
     statuses,
+    statusCounts,
     totalUpdates: updates.length
   };
 }

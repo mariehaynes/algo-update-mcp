@@ -146,6 +146,9 @@ assert.ok(meta.totalUpdates >= 5, 'Should have updates in the archive');
 assert.ok(meta.categories.includes('Google Core Update'), 'Categories must include Core Updates');
 assert.ok(meta.categories.includes('AI Mode & Gemini'), 'Categories must include AI Mode');
 assert.ok(meta.categories.includes('ChatGPT & OpenAI'), 'Categories must include ChatGPT & OpenAI');
+assert.ok(typeof meta.categoryCounts['Google Core Update'] === 'number' && meta.categoryCounts['Google Core Update'] > 0, 'Category counts must be populated');
+assert.ok(typeof meta.platformCounts['Google Search'] === 'number' && meta.platformCounts['Google Search'] > 0, 'Platform counts must be populated');
+console.log(`  Top category counts: Core Updates (${meta.categoryCounts['Google Core Update']}), AI Mode (${meta.categoryCounts['AI Mode & Gemini']})`);
 console.log('  ✅ Test 6 Passed!\n');
 
 console.log('🎉 ALL 6 TEST SUITES PASSED FLAWLESSLY!');
