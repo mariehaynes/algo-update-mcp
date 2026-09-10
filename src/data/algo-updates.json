@@ -186,6 +186,22 @@
     "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
   },
   {
+    "id": "2026-07-09-chatgpt-shopping-shifts-from-web-scraping-to-internal-product-feeds",
+    "title": "ChatGPT Shopping Shifts from Web Scraping to Internal Product Feeds",
+    "date": "2026-07-09",
+    "year": 2026,
+    "category": "ChatGPT / OpenAI",
+    "platform": "ChatGPT / OpenAI",
+    "status": "Confirmed",
+    "summary": "ChatGPT Shopping abruptly shifted from web scraping to internal product feeds, which now account for 60% of product recommendations. 35% of the feed recommendations are Shopify sites. This change coincided with the launch of GPT-5.6. It impacted the visibility of many products in ChatGPT. This was discovered in research by Profound.",
+    "html": "<strong>2026-07-09</strong>: <strong>ChatGPT Shopping Shifts from Web Scraping to Internal Product Feeds</strong>. ChatGPT Shopping abruptly shifted from web scraping to internal product feeds, which now account for 60% of product recommendations. 35% of the feed recommendations are Shopify sites. This change coincided with the launch of GPT-5.6. It impacted the visibility of many products in ChatGPT. This was discovered in research by Profound.",
+    "sources": [
+      "https://www.tryprofound.com/blog/chatgpt-5.6-shopping-transformation",
+      "https://community.mariehaynes.com/posts/107171879"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/"
+  },
+  {
     "id": "2026-05-21-new-core-update-went-live",
     "title": "New core update went live",
     "date": "2026-05-21",
