@@ -1029,7 +1029,7 @@ app.get('/', (req, res) => {
       <button class="tab-btn" onclick="switchTab('antigravity')">Antigravity</button>
       <button class="tab-btn" onclick="switchTab('cursor')">Cursor</button>
       <button class="tab-btn" onclick="switchTab('cli')">Claude Code / CLI</button>
-      <button class="tab-btn" onclick="switchTab('chatgpt')">ChatGPT (Custom GPT)</button>
+      <button class="tab-btn" onclick="switchTab('chatgpt')">ChatGPT</button>
     </div>
 
     <!-- Tab 1: Claude Desktop -->
@@ -1202,61 +1202,142 @@ Please merge the new "marie-haynes-algo" server into my file. Ensure all JSON br
 
     <!-- Tab 5: ChatGPT -->
     <div id="tab-chatgpt" class="tab-pane">
-      <div style="background: #fdfaf6; border-left: 4px solid var(--brand-orange); padding: 12px 16px; margin-bottom: 18px; border-radius: 0 8px 8px 0; font-size: 0.9rem; color: #555;">
-        <strong>ChatGPT Account Types:</strong> Direct MCP connections currently require <strong>ChatGPT Pro, Business, Enterprise, or Edu</strong>. ChatGPT Plus users can connect via <strong>Custom GPT Actions</strong>.
+      <div style="margin-bottom: 18px;">
+        <h3 style="font-size: 1.25rem; color: var(--brand-deep-purple); margin-bottom: 6px;">Connect Marie Haynes’ Algorithm Update List to ChatGPT</h3>
+        <p style="font-size: 0.95rem; color: #555; line-height: 1.5;">Give ChatGPT access to Marie’s timeline of Google algorithm updates and AI Search changes.</p>
       </div>
 
-      <!-- Path 1: Direct MCP for Pro / Business / Enterprise / Edu -->
-      <div style="background: #faf8fc; border: 1px solid #ebdfee; border-radius: 8px; padding: 16px 18px; margin-bottom: 20px;">
-        <h4 style="color: var(--brand-deep-purple); font-size: 1.05rem; margin-bottom: 8px;">
-          ⚡ Direct MCP Connection (ChatGPT Pro, Business, Enterprise, Edu)
+      <ol class="step-list">
+        <li data-step="1">
+          <strong>Enable Developer mode</strong>
+          <p style="font-size: 0.9rem; color: #444; margin-top: 4px;">
+            Open ChatGPT in your desktop browser. Go to <strong>Settings</strong> &rarr; <strong>Security and login</strong> and turn on <strong>Developer mode</strong>.
+          </p>
+        </li>
+
+        <li data-step="2">
+          <strong>Open the Plugins directory</strong>
+          <p style="font-size: 0.9rem; color: #444; margin-top: 4px;">
+            Go directly to <a href="https://chatgpt.com/plugins" target="_blank" rel="noopener" style="color: var(--brand-purple); font-weight: 700; text-decoration: underline;">chatgpt.com/plugins</a> and click the <strong>+</strong> button in the upper-right corner.
+          </p>
+          <div style="font-size: 0.84rem; color: #666; margin-top: 4px; font-style: italic;">
+            This is different from Settings &rarr; Plugins, which manages your installed plugins.
+          </div>
+        </li>
+
+        <li data-step="3">
+          <strong>Add the connection</strong>
+          <p style="font-size: 0.9rem; color: #444; margin-top: 4px;">
+            Enter these details:
+          </p>
+
+          <div style="overflow-x: auto; margin: 12px 0 14px 0; border: 1px solid #ebdfee; border-radius: 8px; box-shadow: 0 2px 8px rgba(92, 40, 130, 0.03);">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left; background: #ffffff;">
+              <thead>
+                <tr style="background: #f8f4fb; border-bottom: 2px solid #ebdfee;">
+                  <th style="padding: 10px 14px; font-family: 'Poppins', sans-serif; font-weight: 700; color: var(--brand-deep-purple); width: 30%;">Field</th>
+                  <th style="padding: 10px 14px; font-family: 'Poppins', sans-serif; font-weight: 700; color: var(--brand-deep-purple);">What to enter</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom: 1px solid #f0eaf4;">
+                  <td style="padding: 10px 14px; font-weight: 600; color: #333;">Name</td>
+                  <td style="padding: 10px 14px; font-weight: 600; color: var(--brand-purple);">Marie Haynes Algo Update List</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f0eaf4;">
+                  <td style="padding: 10px 14px; font-weight: 600; color: #333;">Description <span style="font-weight:400; color:#777;">(optional)</span></td>
+                  <td style="padding: 10px 14px; color: #444;">Google algorithm updates and AI Search changes curated by Marie Haynes.</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f0eaf4;">
+                  <td style="padding: 10px 14px; font-weight: 600; color: #333;">Connection</td>
+                  <td style="padding: 10px 14px; color: #444;"><code>Server URL</code></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f0eaf4;">
+                  <td style="padding: 10px 14px; font-weight: 600; color: #333;">Server URL</td>
+                  <td style="padding: 10px 14px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                      <code id="chatgptServerUrl" style="background:#f4ecf8; color:#5c2882; font-weight:700; padding:3px 8px; border-radius:4px; font-size:0.86rem;">https://algo.mariehaynes.com/mcp</code>
+                      <button type="button" class="copy-btn" style="position: static;" onclick="copySnippet('chatgptServerUrl')">Copy URL</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 14px; font-weight: 600; color: #333;">Authentication</td>
+                  <td style="padding: 10px 14px; color: #444;"><code>No Auth</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="background: #fff8f5; border-left: 3px solid var(--brand-orange); padding: 8px 12px; margin-bottom: 12px; font-size: 0.85rem; color: #555;">
+            <strong>Important:</strong> Include <code>/mcp</code> at the end of the URL. The homepage address alone will not work.
+          </div>
+
+          <p style="font-size: 0.9rem; color: #444; line-height: 1.5;">
+            Read the custom MCP security notice. If you agree to proceed, check the acknowledgement box and click <strong>Create</strong>. Review any tools and permissions shown.
+          </p>
+        </li>
+
+        <li data-step="4">
+          <strong>Use it in a conversation</strong>
+          <p style="font-size: 0.9rem; color: #444; margin-top: 4px;">
+            Start a new conversation and select <strong>Marie Haynes Algo Update List</strong> from the tools menu.
+          </p>
+
+          <p style="font-size: 0.88rem; font-weight: 600; color: var(--brand-deep-purple); margin-top: 10px; margin-bottom: 4px;">
+            Try this prompt:
+          </p>
+          <div style="position: relative; margin-bottom: 10px;">
+            <button class="copy-btn" onclick="copySnippet('chatgptPrompt1')">Copy Prompt</button>
+            <pre style="white-space: pre-wrap; font-size: 0.84rem; line-height: 1.5;"><code id="chatgptPrompt1">Use the Marie Haynes Algo Update List to summarize Google algorithm updates from the past three months. Separate Marie’s recorded observations from your own analysis.</code></pre>
+          </div>
+
+          <p style="font-size: 0.88rem; font-weight: 600; color: var(--brand-deep-purple); margin-top: 10px; margin-bottom: 4px;">
+            Or:
+          </p>
+          <div style="position: relative; margin-bottom: 12px;">
+            <button class="copy-btn" onclick="copySnippet('chatgptPrompt2')">Copy Prompt</button>
+            <pre style="white-space: pre-wrap; font-size: 0.84rem; line-height: 1.5;"><code id="chatgptPrompt2">My Google organic traffic dropped around [date]. Use the Marie Haynes Algo Update List to find updates around that time. Explain what I should investigate without assuming an update caused the drop.</code></pre>
+          </div>
+        </li>
+      </ol>
+
+      <!-- Troubleshooting Section -->
+      <div style="background: #faf8fc; border: 1px solid #ebdfee; border-radius: 8px; padding: 16px 18px; margin-top: 18px;">
+        <h4 style="color: var(--brand-deep-purple); font-size: 1rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          🛠️ Troubleshooting
         </h4>
-        <ol class="step-list" style="margin-top: 10px;">
-          <li data-step="1">
-            In ChatGPT, go to <strong>Settings</strong> &rarr; <strong>Apps</strong> &rarr; <strong>Advanced Settings</strong> &rarr; enable <strong>Developer Mode</strong>.
-          </li>
-          <li data-step="2">
-            Navigate to <strong>Apps</strong> &rarr; click <strong>Create</strong> (or Add App).
-          </li>
-          <li data-step="3">
-            Enter the MCP SSE endpoint URL:
-            <div style="position: relative; margin: 8px 0;">
-              <button class="copy-btn" onclick="copySnippet('chatgptMcpUrl')">📋 Copy MCP Endpoint</button>
-              <pre><code id="chatgptMcpUrl">https://algo.mariehaynes.com/sse</code></pre>
-            </div>
-          </li>
-          <li data-step="4">
-            Save and activate. ChatGPT can now call your algorithm update tools directly in any conversation!
-          </li>
-        </ol>
+        <ul style="margin-left: 1.2rem; font-size: 0.88rem; color: #444; line-height: 1.6;">
+          <li><strong>No + button?</strong> Check that Developer mode is enabled and that you’re on <a href="https://chatgpt.com/plugins" target="_blank" rel="noopener" style="color: var(--brand-purple); font-weight: 600; text-decoration: underline;">the Plugins directory</a>, not Settings &rarr; Plugins.</li>
+          <li><strong>Error creating connector?</strong> Confirm that the URL is exactly <code>https://algo.mariehaynes.com/mcp</code> and Authentication is <strong>No Auth</strong>.</li>
+          <li><strong>No Developer mode option?</strong> Availability depends on your account and workspace policy.</li>
+        </ul>
+        <div style="margin-top: 10px; font-size: 0.84rem; color: #666; border-top: 1px solid #ede7f4; padding-top: 8px;">
+          Setup steps follow <a href="https://developers.openai.com/plugins/deploy/connect-chatgpt" target="_blank" rel="noopener" style="color: var(--brand-purple); font-weight: 600; text-decoration: underline;">OpenAI’s official connection guide</a>.
+        </div>
       </div>
 
-      <!-- Path 2: Custom GPT Action for Plus users -->
-      <div style="background: #ffffff; border: 1px solid #e7e2ee; border-radius: 8px; padding: 16px 18px;">
-        <h4 style="color: var(--brand-purple); font-size: 1.02rem; margin-bottom: 8px;">
-          🧩 Custom GPT Action (ChatGPT Plus & All Paid Plans)
-        </h4>
-        <p style="font-size: 0.88rem; color: #555; margin-bottom: 10px;">
-          If you are on ChatGPT Plus and don't have direct MCP yet, you can connect Marie's database via an OpenAPI Action:
-        </p>
-        <ol class="step-list">
-          <li data-step="1">
-            Click <strong>Explore GPTs</strong> in the left sidebar &rarr; click <strong>+ Create</strong> &rarr; go to the <strong>Configure</strong> tab.
-          </li>
-          <li data-step="2">
-            Scroll down to the bottom &rarr; click <strong>Create new action</strong>.
-          </li>
-          <li data-step="3">
-            Under <strong>Schema</strong>, click <strong>"Import from URL"</strong> and enter:
-            <div style="position: relative; margin: 8px 0;">
-              <button class="copy-btn" onclick="copySnippet('chatgptOpenApiUrl')">📋 Copy OpenAPI URL</button>
-              <pre><code id="chatgptOpenApiUrl">https://algo.mariehaynes.com/openapi.json</code></pre>
-            </div>
-          </li>
-          <li data-step="4">
-            Save your Custom GPT. It will automatically call <code>getAlgoUpdates</code> to answer queries on ranking shifts, core updates, and spam rollouts.
-          </li>
-        </ol>
+      <!-- Alternative / Custom GPT Action Collapsible -->
+      <div style="margin-top: 14px;">
+        <details style="background: #ffffff; border: 1px solid #e7e2ee; border-radius: 8px; padding: 12px 16px; font-size: 0.88rem;">
+          <summary style="font-weight: 600; color: var(--brand-purple); cursor: pointer;">
+            Need an alternative? Connect via Custom GPT Action (OpenAPI)
+          </summary>
+          <div style="margin-top: 10px; line-height: 1.5; color: #555;">
+            <p style="margin-bottom: 6px;">If you prefer creating a standalone Custom GPT without developer plugins, you can import my OpenAPI schema:</p>
+            <ol style="margin-left: 1.4rem; line-height: 1.6;">
+              <li>Go to <strong>Explore GPTs</strong> &rarr; <strong>+ Create</strong> &rarr; <strong>Configure</strong>.</li>
+              <li>Click <strong>Create new action</strong> at the bottom.</li>
+              <li>Under <strong>Schema</strong>, click <strong>"Import from URL"</strong> and enter:
+                <div style="position: relative; margin: 6px 0;">
+                  <button class="copy-btn" onclick="copySnippet('chatgptOpenApiUrl')">Copy OpenAPI URL</button>
+                  <pre style="margin: 0;"><code id="chatgptOpenApiUrl">https://algo.mariehaynes.com/openapi.json</code></pre>
+                </div>
+              </li>
+              <li>Save your Custom GPT.</li>
+            </ol>
+          </div>
+        </details>
       </div>
     </div>
 
@@ -1462,8 +1543,8 @@ Please merge the new "marie-haynes-algo" server into my file. Ensure all JSON br
               <li><strong>Antigravity</strong> (Google's agentic coding assistant)</li>
               <li><strong>Cursor</strong> (AI code editor)</li>
               <li><strong>Claude Code / CLI</strong></li>
-              <li><strong>ChatGPT</strong> (Pro/Enterprise/Edu via direct MCP, or ChatGPT Plus via Custom GPT Actions)</li>
-              <li>Custom developer agents via our public SSE stream or JSON REST API</li>
+              <li><strong>ChatGPT</strong> (via Developer mode at chatgpt.com/plugins or Custom GPT Actions)</li>
+              <li>Custom developer agents via my public SSE stream or JSON REST API</li>
             </ul>
           </div>
         </details>

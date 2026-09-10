@@ -180,8 +180,16 @@ Open Claude Desktop &rarr; **Settings** (`Cmd + ,` on Mac or `Ctrl + ,` on Windo
 - *Note:* In Claude.ai, tool schemas are bound to the conversation when it is initialized. To pick up updated tool parameters (such as `offset` or `sortOrder`), always start a **new chat session**.
 
 ### Connecting to ChatGPT
-- **ChatGPT Pro / Enterprise / Edu (Developer Mode)**: Settings &rarr; Apps &rarr; Advanced Settings &rarr; Developer Mode &rarr; Create, and enter `https://algo.mariehaynes.com/sse`.
-- **ChatGPT Plus / Custom GPTs**: Create a Custom GPT, add an Action, and import the OpenAPI schema from `https://algo.mariehaynes.com/openapi.json`.
+1. **Enable Developer mode**: In ChatGPT (desktop browser), go to **Settings** &rarr; **Security and login** and turn on **Developer mode**.
+2. **Open the Plugins directory**: Go directly to [chatgpt.com/plugins](https://chatgpt.com/plugins) and click the **+** button in the upper-right corner.
+3. **Add the connection**:
+   - **Name**: `Marie Haynes Algo Update List`
+   - **Description**: `Google algorithm updates and AI Search changes curated by Marie Haynes.`
+   - **Connection**: `Server URL`
+   - **Server URL**: `https://algo.mariehaynes.com/mcp` *(be sure to include `/mcp` at the end)*
+   - **Authentication**: `No Auth`
+4. Acknowledge the custom MCP security notice, review permissions, and click **Create**. You can now select Marie Haynes Algo Update List from the tools menu in your chats!
+*(Alternative for Custom GPTs: You can also import the OpenAPI schema from `https://algo.mariehaynes.com/openapi.json` into a Custom GPT Action).*
 
 ---
 
