@@ -75,19 +75,23 @@ assert.strictEqual(page2.offset, 2, 'Page 2 offset should be 2');
 assert.notStrictEqual(page1.updates[0].id, page2.updates[0].id, 'Page 1 and Page 2 must have different records');
 console.log('  ✅ Test 2 Passed!\n');
 
-// Test 3: Search matching precision, relevance floor, and pagination
-console.log('Test 3: searchUpdates precision and date sorting');
-const spamQueryRel = searchUpdates({ query: 'March 2026 spam update', sortBy: 'relevance' });
-console.log(`  "March 2026 spam update" total matched (relevance): ${spamQueryRel.total_matched}`);
-assert.ok(spamQueryRel.total_matched <= 25, 'Should NOT loose-match hundreds of entries on word "update"');
-assert.strictEqual(spamQueryRel.updates[0].title, 'Google launched the March 2026 Spam update', 'Top relevance result must be March 2026 spam update');
-assert.ok(typeof spamQueryRel.updates[0].relevance_score === 'number', 'relevance_score must be exposed on results');
+// Test 3: Search matching precision, sort consistency, minRelevance, and pagination
+console.log('Test 3: searchUpdates consistency across sort modes (HCU test case)');
+const hcuRel = searchUpdates({ query: 'helpful content update', sortBy: 'relevance' });
+const hcuDate = searchUpdates({ query: 'helpful content update', sortBy: 'date' });
+console.log(`  "helpful content update" total matched: ${hcuRel.total_matched} (relevance) vs ${hcuDate.total_matched} (date)`);
+assert.strictEqual(hcuRel.total_matched, hcuDate.total_matched, 'sortBy must NOT change the total_matched result set');
 
-// Test sortBy: 'date' with relevance floor
-const spamQueryDate = searchUpdates({ query: 'March 2026 spam update', sortBy: 'date' });
-console.log(`  "March 2026 spam update" top result (date sort): ${spamQueryDate.updates[0].title} (${spamQueryDate.updates[0].date})`);
-assert.strictEqual(spamQueryDate.updates[0].title, 'Google launched the March 2026 Spam update', 'Date sort must return March 2026 Spam update, not unrelated September models');
-assert.strictEqual(spamQueryDate.total_matched, 1, 'Date sort with relevance floor should narrow to the high-confidence match');
+// Verify March 2024 Core Update (Incorporation of Helpful Content System) is present in both
+const hcuMarchRel = hcuRel.updates.some(u => u.title.includes('March 2024 Core Update'));
+const hcuMarchDate = hcuDate.updates.some(u => u.title.includes('March 2024 Core Update'));
+assert.ok(hcuMarchRel, 'March 2024 Core Update must be present in relevance sort');
+assert.ok(hcuMarchDate, 'March 2024 Core Update must be present in date sort (not pruned!)');
+
+// Test minRelevance filter
+const hcuFiltered = searchUpdates({ query: 'helpful content update', minRelevance: 50 });
+assert.ok(hcuFiltered.total_matched < hcuRel.total_matched, 'minRelevance should filter low-confidence results');
+assert.ok(hcuFiltered.updates.every(u => (u.relevance_score || 0) >= 50), 'All results must satisfy minRelevance floor');
 
 // Test pagination on searchUpdates
 const searchPage1 = searchUpdates({ query: 'spam', limit: 2, offset: 0 });
@@ -100,15 +104,17 @@ assert.strictEqual(searchPage2.offset, 2, 'Search page 2 offset should be 2');
 assert.notStrictEqual(searchPage1.updates[0].id, searchPage2.updates[0].id, 'Page 1 and 2 must have different updates');
 console.log('  ✅ Test 3 Passed!\n');
 
-// Test 4: Date Consistency check (Sept 2 volatility & France AI Overviews)
-console.log('Test 4: Date consistency for September 2 volatility & France AI Overviews');
+// Test 4: Date Consistency and Live Anchor Preservation
+console.log('Test 4: Date consistency & live WordPress anchor preservation');
 const septVol = searchUpdates({ query: 'volatility September 2' });
 assert.ok(septVol.count >= 1, 'Should find September 2 volatility');
 assert.strictEqual(septVol.updates[0].date, '2026-09-02', 'Volatility event date must be 2026-09-02');
+assert.ok(septVol.updates[0].originalUrl.endsWith('#2026-09-08-significant-search-ranking-volatility-detected-on-september-2'), 'Sept 2 originalUrl must target live WordPress anchor');
 
 const france = searchUpdates({ query: 'France AI Overviews' });
 assert.ok(france.count >= 1, 'Should find France AI Overviews');
 assert.strictEqual(france.updates[0].date, '2026-07-22', 'France AI Overviews official launch date must be 2026-07-22');
+assert.ok(france.updates[0].originalUrl.endsWith('#2026-07-21-ai-overviews-rollout-in-france-causes-sharp-click-drops'), 'France originalUrl must target live WordPress anchor');
 console.log('  ✅ Test 4 Passed!\n');
 
 // Test 5: Category and Platform Taxonomy

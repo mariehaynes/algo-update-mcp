@@ -199,6 +199,7 @@ export function searchUpdates(params: {
   platform?: string;
   limit?: number;
   offset?: number;
+  minRelevance?: number;
   sortBy?: 'relevance' | 'date';
   includeHtml?: boolean;
 }): {
@@ -300,13 +301,13 @@ export function searchUpdates(params: {
     return { update: updateWithScore, score, matchedEffectiveCount, qualified };
   }).filter(item => item.qualified && item.score > 0);
 
+  // Optional minRelevance filter (honoured uniformly by all sort modes)
+  if (params.minRelevance !== undefined && params.minRelevance > 0) {
+    scored = scored.filter(s => s.score >= params.minRelevance!);
+  }
+
   // Sorting:
   if (sortBy === 'date') {
-    // When sorting by date, apply a relevance floor so low-scoring accidental matches
-    // don't drown out genuine target updates just because they are more recent.
-    const maxScore = Math.max(...scored.map(s => s.score), 0);
-    const floor = Math.max(25, maxScore * 0.4);
-    scored = scored.filter(s => s.score >= floor);
     scored.sort((a, b) => b.update.date.localeCompare(a.update.date));
   } else {
     scored.sort((a, b) => {

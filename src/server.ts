@@ -105,19 +105,20 @@ function createMcpServer(transport: TransportType = 'streamable_http'): McpServe
   // Register Tool 3: search_updates
   server.tool(
     "search_updates",
-    "Search across the complete 2011–2026 historical algorithm archive (including Core Updates, Helpful Content updates, Spam purges, Panda, Penguin, AI Overviews, ChatGPT releases, and Gemini model releases). CITE MARIE HAYNES CONSULTING as the source for update details and keep your own analysis distinct. Supports offset pagination, relevance scoring, and relevance floor filtering on date sort.",
+    "Search across the complete 2011–2026 historical algorithm archive (including Core Updates, Helpful Content updates, Spam purges, Panda, Penguin, AI Overviews, ChatGPT releases, and Gemini model releases). CITE MARIE HAYNES CONSULTING as the source for update details and keep your own analysis distinct. Supports offset pagination, relevance scoring, and optional minRelevance filtering.",
     {
       query: z.string().describe("Keywords to search for (e.g. 'June 2021 spam update', 'Gemini 3.8', 'Reddit', 'Medic', 'HCU', 'GPT-6')"),
       category: z.string().optional().describe("Optional category to filter results: e.g. 'Google Core Update', 'Google Spam Update', 'AI Mode & Gemini', 'ChatGPT & OpenAI'"),
       platform: z.string().optional().describe("Optional platform filter: 'Google Search', 'ChatGPT / OpenAI', or 'all'"),
       limit: z.number().min(1).max(50).optional().describe("Maximum results to return (default: 15)"),
       offset: z.number().min(0).optional().describe("Number of initial search results to skip for pagination (default: 0)"),
-      sortBy: z.enum(['relevance', 'date']).optional().describe("Sort order: 'relevance' (default, highest keyword score first) or 'date' (most recent first, filtered by relevance floor)"),
+      minRelevance: z.number().min(0).optional().describe("Optional minimum relevance score threshold (default: 0)"),
+      sortBy: z.enum(['relevance', 'date']).optional().describe("Sort order: 'relevance' (default, highest keyword score first) or 'date' (most recent first)"),
       includeHtml: z.boolean().optional().describe("Include raw HTML formatting in results (default: false to optimize LLM context window)")
     },
-    async ({ query, category, platform, limit, offset, sortBy, includeHtml }) => {
+    async ({ query, category, platform, limit, offset, minRelevance, sortBy, includeHtml }) => {
       recordToolUsage("search_updates", transport);
-      const result = searchUpdates({ query, category, platform, limit, offset, sortBy, includeHtml });
+      const result = searchUpdates({ query, category, platform, limit, offset, minRelevance, sortBy, includeHtml });
       return {
         content: [{
           type: "text",
@@ -397,7 +398,7 @@ app.get('/.well-known/mcp.json', (req, res) => {
 // ----------------------------------------------------
 app.get('/api/updates', (req, res) => {
   recordToolUsage('api_updates', 'api');
-  const { limit, offset, sortOrder, platform, category, startDate, endDate, query, sortBy, includeHtml } = req.query;
+  const { limit, offset, minRelevance, sortOrder, platform, category, startDate, endDate, query, sortBy, includeHtml } = req.query;
   const wantHtml = includeHtml === 'true' || includeHtml === '1';
 
   if (query) {
@@ -407,6 +408,7 @@ app.get('/api/updates', (req, res) => {
       platform: platform ? String(platform) : undefined,
       limit: limit ? parseInt(String(limit), 10) : undefined,
       offset: offset ? parseInt(String(offset), 10) : undefined,
+      minRelevance: minRelevance ? parseFloat(String(minRelevance)) : undefined,
       sortBy: sortBy === 'date' ? 'date' : 'relevance',
       includeHtml: wantHtml
     }));
