@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { Firestore } from '@google-cloud/firestore';
 
 export type TransportType = 'streamable_http' | 'sse' | 'stdio' | 'api';
 
@@ -19,7 +20,8 @@ let stats: UsageStats = {
     get_latest_updates: 0,
     get_updates_by_date_range: 0,
     search_updates: 0,
-    get_all_categories: 0
+    get_all_categories: 0,
+    api_updates: 0
   },
   byTransport: {
     streamable_http: 0,
@@ -35,32 +37,87 @@ let stats: UsageStats = {
 // Locate persistent storage path
 const STATS_FILE_PATH = path.join(process.cwd(), 'data/usage-stats.json');
 
-// Load initial stats from disk if available
+// Initialize Firestore client
+let firestoreDb: Firestore | null = null;
 try {
-  if (fs.existsSync(STATS_FILE_PATH)) {
-    const raw = fs.readFileSync(STATS_FILE_PATH, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.totalCalls === 'number') {
-      stats = {
-        totalCalls: parsed.totalCalls || 0,
-        byTool: { ...stats.byTool, ...(parsed.byTool || {}) },
-        byTransport: { ...stats.byTransport, ...(parsed.byTransport || {}) },
-        dailyUsage: parsed.dailyUsage || {},
-        firstRecorded: parsed.firstRecorded || new Date().toISOString(),
-        lastUpdated: parsed.lastUpdated || new Date().toISOString()
-      };
-    }
-  }
+  firestoreDb = new Firestore({
+    projectId: process.env.GOOGLE_CLOUD_PROJECT || 'mhc-news-portal'
+  });
 } catch (err) {
-  console.warn('[Telemetry] Could not load persisted stats file, starting fresh in-memory:', err);
+  console.warn('[Telemetry] Firestore client not initialized, using local fallback:', err);
 }
 
-// Debounced save to disk to avoid blocking I/O
+let isInitialized = false;
+
+// Load initial stats from Firestore (or disk fallback)
+export async function initTelemetry(): Promise<void> {
+  if (firestoreDb) {
+    try {
+      const docRef = firestoreDb.collection('system').doc('algo_mcp_stats');
+      const snap = await docRef.get();
+      if (snap.exists) {
+        const data = snap.data();
+        if (data && typeof data.totalCalls === 'number') {
+          stats = {
+            totalCalls: data.totalCalls || 0,
+            byTool: { ...stats.byTool, ...(data.byTool || {}) },
+            byTransport: { ...stats.byTransport, ...(data.byTransport || {}) },
+            dailyUsage: data.dailyUsage || {},
+            firstRecorded: data.firstRecorded || stats.firstRecorded,
+            lastUpdated: data.lastUpdated || stats.lastUpdated
+          };
+          isInitialized = true;
+          console.log(`[Telemetry] Loaded ${stats.totalCalls} historical queries from Firestore.`);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('[Telemetry] Error reading stats from Firestore:', err);
+    }
+  }
+
+  try {
+    if (fs.existsSync(STATS_FILE_PATH)) {
+      const raw = fs.readFileSync(STATS_FILE_PATH, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.totalCalls === 'number') {
+        stats = {
+          totalCalls: parsed.totalCalls || 0,
+          byTool: { ...stats.byTool, ...(parsed.byTool || {}) },
+          byTransport: { ...stats.byTransport, ...(parsed.byTransport || {}) },
+          dailyUsage: parsed.dailyUsage || {},
+          firstRecorded: parsed.firstRecorded || stats.firstRecorded,
+          lastUpdated: parsed.lastUpdated || stats.lastUpdated
+        };
+        isInitialized = true;
+      }
+    }
+  } catch (err) {
+    console.warn('[Telemetry] Could not load persisted stats file, starting fresh in-memory:', err);
+  }
+}
+
+// Auto-run init in background on module load
+initTelemetry().catch(() => {});
+
+// Debounced save to Firestore and disk to avoid blocking I/O
 let saveTimer: NodeJS.Timeout | null = null;
 function persistStats(): void {
   if (saveTimer) return;
-  saveTimer = setTimeout(() => {
+  saveTimer = setTimeout(async () => {
     saveTimer = null;
+
+    // 1. Persist to Firestore
+    if (firestoreDb) {
+      try {
+        const docRef = firestoreDb.collection('system').doc('algo_mcp_stats');
+        await docRef.set(stats, { merge: true });
+      } catch (err) {
+        console.warn('[Telemetry] Failed to persist stats to Firestore:', err);
+      }
+    }
+
+    // 2. Persist to local disk
     try {
       const dir = path.dirname(STATS_FILE_PATH);
       if (!fs.existsSync(dir)) {

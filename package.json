@@ -23,6 +23,7 @@
   "author": "Marie Haynes Consulting Inc.",
   "license": "MIT",
   "dependencies": {
+    "@google-cloud/firestore": "^9.1.0",
     "@modelcontextprotocol/sdk": "^1.6.1",
     "cheerio": "^1.0.0",
     "cors": "^2.8.5",

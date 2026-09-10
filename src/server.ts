@@ -14,7 +14,7 @@ import {
   ATTRIBUTION_FOOTER
 } from './tools.js';
 import { MHC_LOGO_BASE64 } from './logoData.js';
-import { recordToolUsage, getUsageStats, TransportType } from './telemetry.js';
+import { recordToolUsage, getUsageStats, initTelemetry, TransportType } from './telemetry.js';
 import { renderStatsHtml } from './statsHtml.js';
 
 const app = express();
@@ -305,6 +305,7 @@ app.get('/api/updates', (req, res) => {
 });
 
 app.get('/updates.json', (req, res) => {
+  recordToolUsage('api_updates', 'api');
   const updates = loadUpdates();
   res.json(updates);
 });
@@ -312,11 +313,13 @@ app.get('/updates.json', (req, res) => {
 // ----------------------------------------------------
 // Public Usage Statistics & Analytics Dashboard
 // ----------------------------------------------------
-app.get('/api/stats', (req, res) => {
+app.get('/api/stats', async (req, res) => {
+  await initTelemetry();
   res.json(getUsageStats());
 });
 
-app.get('/stats', (req, res) => {
+app.get('/stats', async (req, res) => {
+  await initTelemetry();
   const stats = getUsageStats();
   res.send(renderStatsHtml(stats));
 });
@@ -1440,13 +1443,15 @@ const entryFile = process.argv[1] ? path.basename(process.argv[1]) : '';
 const isDirectRun = entryFile === 'server.ts' || entryFile === 'server.js';
 
 if (isDirectRun && process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Marie Haynes Algo Update MCP Server listening on port ${PORT}`);
-    console.log(`👉 Web Portal: http://localhost:${PORT}/`);
-    console.log(`👉 Usage Dashboard: http://localhost:${PORT}/stats`);
-    console.log(`👉 MCP SSE Endpoint: http://localhost:${PORT}/sse`);
-    console.log(`👉 WebMCP Spec: http://localhost:${PORT}/.well-known/mcp.json`);
-    console.log(`👉 REST API Feed: http://localhost:${PORT}/api/updates`);
+  initTelemetry().then(() => {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Marie Haynes Algo Update MCP Server listening on port ${PORT}`);
+      console.log(`👉 Web Portal: http://localhost:${PORT}/`);
+      console.log(`👉 Usage Dashboard: http://localhost:${PORT}/stats`);
+      console.log(`👉 MCP SSE Endpoint: http://localhost:${PORT}/sse`);
+      console.log(`👉 WebMCP Spec: http://localhost:${PORT}/.well-known/mcp.json`);
+      console.log(`👉 REST API Feed: http://localhost:${PORT}/api/updates`);
+    });
   });
 }
 
