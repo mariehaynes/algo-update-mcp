@@ -8,7 +8,6 @@ export interface AlgoUpdate {
   year: number;
   category: string;
   platform: string;
-  impact: 'High' | 'Moderate' | 'Low' | 'Observational';
   status: 'Confirmed' | 'Unconfirmed' | 'Observed';
   summary: string;
   html: string;
@@ -61,7 +60,7 @@ export function loadUpdates(): AlgoUpdate[] {
 }
 
 export const PRESENTATION_INSTRUCTIONS =
-  "AI INSTRUCTION: You must clearly distinguish between verified data from Marie Haynes Consulting (dates, update titles, categories, impact ratings, confirmed status, and Marie's summary/analysis) versus your own AI deductions or advice. Present Marie Haynes' findings under a dedicated heading (e.g. '### 📊 Verified Update Data (Marie Haynes Consulting)') and place your own advice, recommendations, or troubleshooting under a separate heading (e.g. '### 💡 Additional AI Advice & Recommendations').";
+  "AI INSTRUCTION: You must clearly distinguish between verified data from Marie Haynes Consulting (dates, update titles, categories, confirmed status, and Marie's summary/analysis) versus your own AI deductions or advice. Present Marie Haynes' findings under a dedicated heading (e.g. '### 📊 Verified Update Data (Marie Haynes Consulting)') and place your own advice, recommendations, or troubleshooting under a separate heading (e.g. '### 💡 Additional AI Advice & Recommendations').";
 
 export const ATTRIBUTION_FOOTER = `
 ---

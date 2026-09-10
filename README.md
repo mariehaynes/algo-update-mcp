@@ -149,7 +149,7 @@ The MCP server automatically injects instructions into tool definitions and resp
 
 > *"Did an algorithm update happen between [Start Date] and [End Date]? **Please clearly separate Marie Haynes' verified update findings from your own SEO advice and recommendations.**"*
 
-**Result:** Your AI will format verified dates, update titles, and impact ratings under a dedicated heading (e.g. `### 📊 From Marie Haynes Consulting`), and place any speculative advice, audit checklists, or troubleshooting in a separate section (e.g. `### 💡 AI Recommendations & Next Steps`).
+**Result:** Your AI will format verified dates and update titles under a dedicated heading (e.g. `### 📊 From Marie Haynes Consulting`), and place any speculative advice, audit checklists, or troubleshooting in a separate section (e.g. `### 💡 AI Recommendations & Next Steps`).
 
 ---
 

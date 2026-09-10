@@ -33,7 +33,7 @@ function createMcpServer(transport: TransportType = 'streamable_http'): McpServe
   // Register Tool 1: get_latest_updates
   server.tool(
     "get_latest_updates",
-    "Fetch the most recent Google algorithm updates, AI Mode model rollouts (e.g. Gemini 3.8 Flash), and AI search changes with verified dates, impact levels, and Marie Haynes' analysis. NOTE FOR AI: When presenting results, you must clearly distinguish between verified data/analysis from Marie Haynes Consulting versus your own deductions or recommendations.",
+    "Fetch the most recent Google algorithm updates, AI Mode model rollouts (e.g. Gemini 3.8 Flash), and AI search changes with verified dates and Marie Haynes' analysis. NOTE FOR AI: When presenting results, you must clearly distinguish between verified data/analysis from Marie Haynes Consulting versus your own deductions or recommendations.",
     {
       limit: z.number().min(1).max(50).optional().describe("Number of recent updates to return (default: 10, max: 50)"),
       platform: z.string().optional().describe("Filter by platform: 'Google Search', 'ChatGPT / OpenAI', 'Perplexity', or 'all'"),
@@ -134,7 +134,7 @@ Please use the 'get_updates_by_date_range' tool to check Marie Haynes' algorithm
 CRITICAL PRESENTATION REQUIREMENT:
 You must clearly separate your response into two distinct sections:
 1. '### 📊 Verified Update Intelligence (from Marie Haynes Consulting)'
-   - Detail every confirmed, unconfirmed, or spam update, their exact dates, impact ratings, and Marie Haynes' analysis/observations.
+   - Detail every confirmed, unconfirmed, or spam update, their exact dates, and Marie Haynes' analysis/observations.
 2. '### 💡 AI Strategic Recommendations & Next Steps'
    - Provide your own strategic advice, diagnostics, and recommended next steps based on those updates.
 
@@ -164,7 +164,7 @@ Do not blend or blur Marie Haynes' verified update facts with your own commentar
 
 CRITICAL PRESENTATION REQUIREMENT:
 When presenting your answer:
-1. Under '### 📊 Findings from Marie Haynes' Algorithm Intelligence', present the verified dates, update details, impact levels, and Marie Haynes' commentary directly from the MCP.
+1. Under '### 📊 Findings from Marie Haynes' Algorithm Intelligence', present the verified dates, update details, and Marie Haynes' commentary directly from the MCP.
 2. Under '### 💡 AI Analysis & Actionable Advice', provide your own SEO insights, advice, and recommendations.
 
 Do not mix what comes from Marie Haynes Consulting with your own opinions.`
@@ -380,7 +380,7 @@ app.get('/openapi.json', (req, res) => {
           ],
           responses: {
             "200": {
-              description: "List of algorithm updates with dates, summaries, and impact ratings.",
+              description: "List of algorithm updates with dates and summaries.",
               content: {
                 "application/json": {
                   schema: { type: "object" }
@@ -1162,7 +1162,7 @@ Please merge the new "marie-haynes-algo" server into my file. Ensure all JSON br
         <div>
           <h4 style="color: var(--brand-purple); font-size: 1.05rem; margin-bottom: 6px;">📖 Open Knowledge Format (OKF)</h4>
           <p style="font-size: 0.92rem; color: #444; line-height: 1.6; margin-bottom: 12px;">
-            Every update in my archive is maintained as an independent, transparent Markdown document with structured YAML frontmatter (verified date, category, platform, impact level, and reference links). This deterministic structure lets AI agents retrieve exact chronological facts without hallucinations.
+            Every update in my archive is maintained as an independent, transparent Markdown document with structured YAML frontmatter (verified date, category, platform, and reference links). This deterministic structure lets AI agents retrieve exact chronological facts without hallucinations.
           </p>
         </div>
         <div style="border-top: 1px solid #f0e7f5; padding-top: 10px; margin-top: 6px;">
@@ -1196,7 +1196,7 @@ Please merge the new "marie-haynes-algo" server into my file. Ensure all JSON br
         <span style="color: var(--brand-purple); font-weight: 700;">Prompt Tip:</span> <em>"Did any Google updates occur between August 10 and August 28, 2026? <strong>Please clearly separate Marie Haynes' verified update data from your own SEO advice and recommendations.</strong>"</em>
       </div>
       <div style="font-size: 0.84rem; color: #666; margin-top: 8px;">
-        ✨ <em>Your AI will then neatly format Marie's verified update dates and impact assessments under one heading, and keep its own diagnostic ideas and recommendations under a separate heading!</em>
+        ✨ <em>Your AI will then neatly format Marie's verified update dates and summaries under one heading, and keep its own diagnostic ideas and recommendations under a separate heading!</em>
       </div>
     </div>
 
