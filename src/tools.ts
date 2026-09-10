@@ -15,6 +15,7 @@ export interface AlgoUpdate {
   sources: string[];
   originalUrl: string;
   source: string;
+  relevance_score?: number;
 }
 
 function formatUpdate(u: AlgoUpdate, includeHtml?: boolean): AlgoUpdate {
@@ -197,26 +198,36 @@ export function searchUpdates(params: {
   category?: string;
   platform?: string;
   limit?: number;
+  offset?: number;
   sortBy?: 'relevance' | 'date';
   includeHtml?: boolean;
 }): {
   query: string;
   count: number;
   total_matched: number;
+  offset: number;
+  next_offset: number | null;
   truncated: boolean;
+  is_exhaustive: boolean;
   updates: AlgoUpdate[];
   attribution: string;
 } {
   const updates = loadUpdates();
   const rawQuery = params.query.toLowerCase().trim();
   const limit = Math.min(Math.max(params.limit || 15, 1), 50);
+  const offset = Math.max(params.offset || 0, 0);
   const sortBy = params.sortBy || 'relevance';
 
-  // Extract search tokens, filtering out common noise words
+  // Extract search tokens, distinguishing domain noise words from specific intent terms
   const stopWords = new Set(['the', 'and', 'a', 'an', 'in', 'on', 'of', 'for', 'with', 'at', 'by', 'from', 'to', 'is', 'was', 'are']);
-  const tokens = rawQuery
+  const genericWords = new Set(['update', 'updates', 'algorithm', 'algo', 'google', 'search']);
+
+  const allTokens = rawQuery
     .split(/[^a-z0-9]+/i)
     .filter(t => t.length > 1 && !stopWords.has(t));
+
+  const specificTokens = allTokens.filter(t => !genericWords.has(t));
+  const effectiveTokens = specificTokens.length > 0 ? specificTokens : allTokens;
 
   // Category and platform pre-filtering
   let pool = updates;
@@ -228,7 +239,7 @@ export function searchUpdates(params: {
   }
 
   // Score each entry
-  const scored = pool.map(u => {
+  let scored = pool.map(u => {
     let score = 0;
     const titleLower = u.title.toLowerCase();
     const summaryLower = u.summary.toLowerCase();
@@ -237,28 +248,65 @@ export function searchUpdates(params: {
     const fullText = `${titleLower} ${summaryLower} ${catLower} ${dateStr}`;
 
     // Exact phrase bonus
-    if (fullText.includes(rawQuery)) {
-      score += 50;
+    const exactMatch = fullText.includes(rawQuery);
+    if (exactMatch) score += 60;
+    if (titleLower.includes(rawQuery)) score += 40;
+
+    // Token matching across specific / effective tokens
+    let matchedEffectiveCount = 0;
+    for (const t of effectiveTokens) {
+      let tokenMatched = false;
+      if (titleLower.includes(t)) {
+        score += 25; // Higher weight for title match
+        tokenMatched = true;
+      } else if (dateStr.includes(t)) {
+        score += 20; // High weight for year/date match (e.g. "2026")
+        tokenMatched = true;
+      } else if (catLower.includes(t)) {
+        score += 15;
+        tokenMatched = true;
+      } else if (summaryLower.includes(t)) {
+        score += 8;
+        tokenMatched = true;
+      }
+      if (tokenMatched) matchedEffectiveCount++;
     }
 
-    // Token matching
-    for (const token of tokens) {
-      if (titleLower.includes(token)) {
-        score += 15; // Higher weight for title match
-      } else if (dateStr.includes(token)) {
-        score += 12; // High weight for year/date match (e.g. "2021")
-      } else if (catLower.includes(token)) {
-        score += 8;
-      } else if (summaryLower.includes(token)) {
-        score += 5;
+    // Minor weight for generic words in title (e.g. "Spam Update" vs "Spam")
+    for (const t of allTokens) {
+      if (genericWords.has(t) && titleLower.includes(t)) {
+        score += 3;
       }
     }
 
-    return { update: u, score };
-  }).filter(item => item.score > 0);
+    // Qualification threshold:
+    // Avoid loose OR-matching on every single word (e.g. "update" matching 480/556 entries)
+    let qualified = false;
+    if (exactMatch) {
+      qualified = true;
+    } else if (effectiveTokens.length === 1) {
+      qualified = matchedEffectiveCount >= 1;
+    } else if (effectiveTokens.length === 2) {
+      qualified = matchedEffectiveCount >= 2 || (matchedEffectiveCount >= 1 && score >= 25);
+    } else {
+      qualified = matchedEffectiveCount >= Math.min(effectiveTokens.length, Math.max(2, Math.ceil(effectiveTokens.length * 0.6)));
+    }
 
-  // Sort by relevance score (descending) then date, or by date
+    const updateWithScore: AlgoUpdate = {
+      ...u,
+      relevance_score: score
+    };
+
+    return { update: updateWithScore, score, matchedEffectiveCount, qualified };
+  }).filter(item => item.qualified && item.score > 0);
+
+  // Sorting:
   if (sortBy === 'date') {
+    // When sorting by date, apply a relevance floor so low-scoring accidental matches
+    // don't drown out genuine target updates just because they are more recent.
+    const maxScore = Math.max(...scored.map(s => s.score), 0);
+    const floor = Math.max(25, maxScore * 0.4);
+    scored = scored.filter(s => s.score >= floor);
     scored.sort((a, b) => b.update.date.localeCompare(a.update.date));
   } else {
     scored.sort((a, b) => {
@@ -270,12 +318,18 @@ export function searchUpdates(params: {
   }
 
   const totalMatched = scored.length;
-  const results = scored.slice(0, limit).map(item => formatUpdate(item.update, params.includeHtml));
+  const sliced = scored.slice(offset, offset + limit);
+  const results = sliced.map(item => formatUpdate(item.update, params.includeHtml));
+  const nextOffset = offset + results.length < totalMatched ? offset + results.length : null;
+
   return {
     query: params.query,
     count: results.length,
     total_matched: totalMatched,
-    truncated: totalMatched > results.length,
+    offset,
+    next_offset: nextOffset,
+    truncated: nextOffset !== null,
+    is_exhaustive: offset === 0 && totalMatched === results.length,
     updates: results,
     attribution: ATTRIBUTION_FOOTER.trim()
   };

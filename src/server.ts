@@ -105,18 +105,19 @@ function createMcpServer(transport: TransportType = 'streamable_http'): McpServe
   // Register Tool 3: search_updates
   server.tool(
     "search_updates",
-    "Search across the complete 2011–2026 historical algorithm archive (including Core Updates, Helpful Content updates, Spam purges, Panda, Penguin, AI Overviews, ChatGPT releases, and Gemini model releases). CITE MARIE HAYNES CONSULTING as the source for update details and keep your own analysis distinct.",
+    "Search across the complete 2011–2026 historical algorithm archive (including Core Updates, Helpful Content updates, Spam purges, Panda, Penguin, AI Overviews, ChatGPT releases, and Gemini model releases). CITE MARIE HAYNES CONSULTING as the source for update details and keep your own analysis distinct. Supports offset pagination, relevance scoring, and relevance floor filtering on date sort.",
     {
       query: z.string().describe("Keywords to search for (e.g. 'June 2021 spam update', 'Gemini 3.8', 'Reddit', 'Medic', 'HCU', 'GPT-6')"),
       category: z.string().optional().describe("Optional category to filter results: e.g. 'Google Core Update', 'Google Spam Update', 'AI Mode & Gemini', 'ChatGPT & OpenAI'"),
       platform: z.string().optional().describe("Optional platform filter: 'Google Search', 'ChatGPT / OpenAI', or 'all'"),
       limit: z.number().min(1).max(50).optional().describe("Maximum results to return (default: 15)"),
-      sortBy: z.enum(['relevance', 'date']).optional().describe("Sort order: 'relevance' (default, highest keyword score first) or 'date' (most recent first)"),
+      offset: z.number().min(0).optional().describe("Number of initial search results to skip for pagination (default: 0)"),
+      sortBy: z.enum(['relevance', 'date']).optional().describe("Sort order: 'relevance' (default, highest keyword score first) or 'date' (most recent first, filtered by relevance floor)"),
       includeHtml: z.boolean().optional().describe("Include raw HTML formatting in results (default: false to optimize LLM context window)")
     },
-    async ({ query, category, platform, limit, sortBy, includeHtml }) => {
+    async ({ query, category, platform, limit, offset, sortBy, includeHtml }) => {
       recordToolUsage("search_updates", transport);
-      const result = searchUpdates({ query, category, platform, limit, sortBy, includeHtml });
+      const result = searchUpdates({ query, category, platform, limit, offset, sortBy, includeHtml });
       return {
         content: [{
           type: "text",
@@ -405,6 +406,7 @@ app.get('/api/updates', (req, res) => {
       category: category ? String(category) : undefined,
       platform: platform ? String(platform) : undefined,
       limit: limit ? parseInt(String(limit), 10) : undefined,
+      offset: offset ? parseInt(String(offset), 10) : undefined,
       sortBy: sortBy === 'date' ? 'date' : 'relevance',
       includeHtml: wantHtml
     }));

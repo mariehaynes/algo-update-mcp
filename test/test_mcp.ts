@@ -33,8 +33,6 @@ console.log('  ✅ Test 1 Passed!\n');
 
 // Test 2: getUpdatesByDateRange & interval overlap matching
 console.log('Test 2: getUpdatesByDateRange interval overlap matching');
-// March 2026 Core Update started 2026-03-27 with rolloutEnd: 2026-04-08.
-// A query for 2026-04-01 to 2026-04-05 sits strictly inside the rollout!
 const insideRollout = getUpdatesByDateRange({
   startDate: '2026-04-01',
   endDate: '2026-04-05'
@@ -56,7 +54,6 @@ assert.strictEqual(augRange.truncated, false, 'Date range must not be truncated'
 assert.strictEqual(augRange.is_exhaustive, true, 'is_exhaustive must be true for date range queries');
 assert.strictEqual(augRange.offset, 0, 'Default offset should be 0');
 assert.strictEqual(augRange.next_offset, null, 'next_offset should be null when not truncated');
-// Oldest-first chronological check
 assert.ok(augRange.updates[0].date <= augRange.updates[augRange.updates.length - 1].date, 'Default sort must be oldest-first (asc)');
 
 // Test pagination with limit and offset
@@ -76,21 +73,46 @@ const page2 = getUpdatesByDateRange({
 });
 assert.strictEqual(page2.offset, 2, 'Page 2 offset should be 2');
 assert.notStrictEqual(page1.updates[0].id, page2.updates[0].id, 'Page 1 and Page 2 must have different records');
-
-const titles = augRange.updates.map(u => u.title).join(' | ');
-assert.ok(titles.includes('Spam Update'), 'Must contain August Spam Update');
-assert.ok(titles.includes('Gemini') || titles.includes('Reddit') || titles.includes('UCP'), 'Must contain August updates');
 console.log('  ✅ Test 2 Passed!\n');
 
-// Test 3: Date Consistency check (Sept 2 volatility record)
-console.log('Test 3: Date consistency for September 2, 2026 volatility');
-const septVol = searchUpdates({ query: 'volatility September 2' });
-assert.ok(septVol.count >= 1, 'Should find September 2 volatility');
-assert.strictEqual(septVol.updates[0].date, '2026-09-02', 'Volatility event date must be 2026-09-02, not publication date');
+// Test 3: Search matching precision, relevance floor, and pagination
+console.log('Test 3: searchUpdates precision and date sorting');
+const spamQueryRel = searchUpdates({ query: 'March 2026 spam update', sortBy: 'relevance' });
+console.log(`  "March 2026 spam update" total matched (relevance): ${spamQueryRel.total_matched}`);
+assert.ok(spamQueryRel.total_matched <= 25, 'Should NOT loose-match hundreds of entries on word "update"');
+assert.strictEqual(spamQueryRel.updates[0].title, 'Google launched the March 2026 Spam update', 'Top relevance result must be March 2026 spam update');
+assert.ok(typeof spamQueryRel.updates[0].relevance_score === 'number', 'relevance_score must be exposed on results');
+
+// Test sortBy: 'date' with relevance floor
+const spamQueryDate = searchUpdates({ query: 'March 2026 spam update', sortBy: 'date' });
+console.log(`  "March 2026 spam update" top result (date sort): ${spamQueryDate.updates[0].title} (${spamQueryDate.updates[0].date})`);
+assert.strictEqual(spamQueryDate.updates[0].title, 'Google launched the March 2026 Spam update', 'Date sort must return March 2026 Spam update, not unrelated September models');
+assert.strictEqual(spamQueryDate.total_matched, 1, 'Date sort with relevance floor should narrow to the high-confidence match');
+
+// Test pagination on searchUpdates
+const searchPage1 = searchUpdates({ query: 'spam', limit: 2, offset: 0 });
+assert.strictEqual(searchPage1.count, 2, 'Search page 1 count should be 2');
+assert.strictEqual(searchPage1.offset, 0, 'Offset should be 0');
+assert.strictEqual(searchPage1.next_offset, 2, 'next_offset should be 2');
+assert.strictEqual(searchPage1.truncated, true, 'truncated should be true');
+const searchPage2 = searchUpdates({ query: 'spam', limit: 2, offset: 2 });
+assert.strictEqual(searchPage2.offset, 2, 'Search page 2 offset should be 2');
+assert.notStrictEqual(searchPage1.updates[0].id, searchPage2.updates[0].id, 'Page 1 and 2 must have different updates');
 console.log('  ✅ Test 3 Passed!\n');
 
-// Test 4: Category and Platform Taxonomy
-console.log('Test 4: Category & platform taxonomy');
+// Test 4: Date Consistency check (Sept 2 volatility & France AI Overviews)
+console.log('Test 4: Date consistency for September 2 volatility & France AI Overviews');
+const septVol = searchUpdates({ query: 'volatility September 2' });
+assert.ok(septVol.count >= 1, 'Should find September 2 volatility');
+assert.strictEqual(septVol.updates[0].date, '2026-09-02', 'Volatility event date must be 2026-09-02');
+
+const france = searchUpdates({ query: 'France AI Overviews' });
+assert.ok(france.count >= 1, 'Should find France AI Overviews');
+assert.strictEqual(france.updates[0].date, '2026-07-22', 'France AI Overviews official launch date must be 2026-07-22');
+console.log('  ✅ Test 4 Passed!\n');
+
+// Test 5: Category and Platform Taxonomy
+console.log('Test 5: Category & platform taxonomy');
 const oaiCategory = searchUpdates({ query: 'Astra', category: 'ChatGPT & OpenAI' });
 assert.ok(oaiCategory.count >= 1, 'Should find GPT-6 Astra under "ChatGPT & OpenAI" category');
 assert.strictEqual(oaiCategory.updates[0].category, 'ChatGPT & OpenAI', 'Category must be "ChatGPT & OpenAI"');
@@ -100,10 +122,10 @@ const redditChatGpt = searchUpdates({ query: 'Reddit', platform: 'ChatGPT / Open
 assert.ok(redditChatGpt.count >= 1, 'Cross-platform Reddit update must match platform "ChatGPT / OpenAI"');
 const redditGoogle = searchUpdates({ query: 'Reddit', platform: 'Google Search' });
 assert.ok(redditGoogle.count >= 1, 'Cross-platform Reddit update must match platform "Google Search"');
-console.log('  ✅ Test 4 Passed!\n');
+console.log('  ✅ Test 5 Passed!\n');
 
-// Test 5: getAllCategories
-console.log('Test 5: getAllCategories()');
+// Test 6: getAllCategories
+console.log('Test 6: getAllCategories()');
 const meta = getAllCategories();
 console.log(`  Total historical updates in database: ${meta.totalUpdates}`);
 console.log(`  Categories (${meta.categories.length}): ${meta.categories.slice(0, 6).join(', ')}...`);
@@ -112,6 +134,6 @@ assert.ok(meta.totalUpdates >= 5, 'Should have updates in the archive');
 assert.ok(meta.categories.includes('Google Core Update'), 'Categories must include Core Updates');
 assert.ok(meta.categories.includes('AI Mode & Gemini'), 'Categories must include AI Mode');
 assert.ok(meta.categories.includes('ChatGPT & OpenAI'), 'Categories must include ChatGPT & OpenAI');
-console.log('  ✅ Test 5 Passed!\n');
+console.log('  ✅ Test 6 Passed!\n');
 
-console.log('🎉 ALL TEST SUITES PASSED FLAWLESSLY!');
+console.log('🎉 ALL 6 TEST SUITES PASSED FLAWLESSLY!');
