@@ -1,7 +1,7 @@
 {
   "name": "algo-update-mcp",
   "version": "1.0.0",
-  "description": "Marie Haynes Algorithm & AI Search Changes MCP Server",
+  "description": "Reference architecture and blueprint for building an MCP knowledge server, modeled on Marie Haynes' Algorithm Updates service",
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc && mkdir -p dist/data && cp -r src/data/ dist/data/",
