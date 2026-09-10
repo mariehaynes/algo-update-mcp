@@ -151,4 +151,34 @@ assert.ok(typeof meta.platformCounts['Google Search'] === 'number' && meta.platf
 console.log(`  Top category counts: Core Updates (${meta.categoryCounts['Google Core Update']}), AI Mode (${meta.categoryCounts['AI Mode & Gemini']})`);
 console.log('  ✅ Test 6 Passed!\n');
 
-console.log('🎉 ALL 6 TEST SUITES PASSED FLAWLESSLY!');
+// Test 7: Category filter on getUpdatesByDateRange & query-free searchUpdates
+console.log('Test 7: Chronological category filtering & query-free search');
+const volatilityRange = getUpdatesByDateRange({
+  startDate: '2024-01-01',
+  endDate: '2026-09-10',
+  category: 'Unannounced / Volatility'
+});
+assert.ok(volatilityRange.count > 0, 'Should find unannounced volatility updates within date range');
+assert.ok(volatilityRange.updates.every(u => u.category.includes('Unannounced / Volatility')), 'All returned updates must match the category');
+console.log(`  Found ${volatilityRange.count} volatility updates between 2024 and 2026`);
+
+// Query-free searchUpdates with category
+const queryFreeSearch = searchUpdates({
+  category: 'Unannounced / Volatility',
+  limit: 10
+});
+assert.ok(queryFreeSearch.count > 0, 'Query-free search with category should return updates');
+assert.strictEqual(queryFreeSearch.updates[0].category, 'Unannounced / Volatility', 'Top update category should match');
+assert.strictEqual(queryFreeSearch.updates[0].relevance_score, 100, 'Relevance score should be 100 for query-free matches');
+assert.ok(queryFreeSearch.updates[0].date >= queryFreeSearch.updates[queryFreeSearch.updates.length - 1].date, 'Should be sorted date descending');
+console.log(`  Query-free search returned ${queryFreeSearch.count} updates in category '${queryFreeSearch.updates[0].category}'`);
+console.log('  ✅ Test 7 Passed!\n');
+
+// Test 8: Harmonized Gemini 3.8 Flash date text
+console.log('Test 8: Harmonized Gemini 3.8 Flash release reference in September 2 volatility');
+const sept2Record = searchUpdates({ query: 'Significant Search Ranking Volatility Detected on September 2' });
+assert.ok(sept2Record.count >= 1, 'Should find September 2 volatility record');
+assert.ok(sept2Record.updates[0].summary.includes('Around September 2–3, Gemini 3.8 Flash rolled out'), 'Summary should say "Around September 2–3, Gemini 3.8 Flash rolled out"');
+console.log('  ✅ Test 8 Passed!\n');
+
+console.log('🎉 ALL 8 TEST SUITES PASSED FLAWLESSLY!');

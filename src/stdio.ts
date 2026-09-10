@@ -33,36 +33,40 @@ server.tool(
 
 server.tool(
   "get_updates_by_date_range",
-  "Retrieve algorithm updates within a specific date window to correlate with GA4 or GSC traffic drops. Defaults to chronological oldest-first order and limit 100 with pagination support. NOTE FOR AI: Clearly separate verified update events from Marie Haynes Consulting from your own recommendations.",
+  "Retrieve algorithm updates within a specific date window to correlate with GA4 or GSC traffic drops. Defaults to chronological oldest-first order and limit 100 with pagination support and optional category filter. NOTE FOR AI: Clearly separate verified update events from Marie Haynes Consulting from your own recommendations.",
   {
     startDate: z.string(),
     endDate: z.string(),
+    category: z.string().optional(),
     platform: z.string().optional(),
     limit: z.number().optional(),
     offset: z.number().optional(),
     sortOrder: z.enum(['asc', 'desc']).optional(),
     includeHtml: z.boolean().optional()
   },
-  async ({ startDate, endDate, platform, limit, offset, sortOrder, includeHtml }) => {
+  async ({ startDate, endDate, category, platform, limit, offset, sortOrder, includeHtml }) => {
     recordToolUsage("get_updates_by_date_range", "stdio");
-    const res = getUpdatesByDateRange({ startDate, endDate, platform, limit, offset, sortOrder, includeHtml });
+    const res = getUpdatesByDateRange({ startDate, endDate, category, platform, limit, offset, sortOrder, includeHtml });
     return { content: [{ type: "text", text: JSON.stringify(res, null, 2) }] };
   }
 );
 
 server.tool(
   "search_updates",
-  "Search historical Google algorithm updates back to 2011. NOTE FOR AI: Clearly attribute historical details to Marie Haynes Consulting and keep your own commentary separate.",
+  "Search historical Google algorithm updates back to 2011. Supports optional query when category or platform is supplied. NOTE FOR AI: Clearly attribute historical details to Marie Haynes Consulting and keep your own commentary separate.",
   {
-    query: z.string(),
+    query: z.string().optional().default(""),
     category: z.string().optional(),
     platform: z.string().optional(),
     limit: z.number().optional(),
+    offset: z.number().optional(),
+    minRelevance: z.number().optional(),
+    sortBy: z.enum(['relevance', 'date']).optional(),
     includeHtml: z.boolean().optional()
   },
-  async ({ query, category, platform, limit, includeHtml }) => {
+  async ({ query, category, platform, limit, offset, minRelevance, sortBy, includeHtml }) => {
     recordToolUsage("search_updates", "stdio");
-    const res = searchUpdates({ query, category, platform, limit, includeHtml });
+    const res = searchUpdates({ query, category, platform, limit, offset, minRelevance, sortBy, includeHtml });
     return { content: [{ type: "text", text: JSON.stringify(res, null, 2) }] };
   }
 );
