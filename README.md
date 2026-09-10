@@ -24,7 +24,7 @@ The system is architected as an Open Knowledge Format (OKF) ecosystem:
 - **Sample OKF Dataset (`sample-okf/`)**: Contains sample human-readable Markdown files with YAML frontmatter demonstrating the Open Knowledge Format structure.
 - **Lookup Index (`src/data/algo-updates.json`)**: In-memory JSON dataset of sample updates for instant local development and testing. (In production, Marie's hosted server at `algo.mariehaynes.com` serves the full 15-year verified archive of 590+ updates).
 - **Anonymous Telemetry & Analytics (`src/telemetry.ts` & `src/statsHtml.ts`)**:
-  - In-memory aggregate counters persisted to `data/usage-stats.json`.
+  - In-memory aggregate counters persisted to Google Cloud Firestore (`system/algo_mcp_stats`) with fallback to local `data/usage-stats.json`. Survives Cloud Run cold starts and container redeployments.
   - Strictly anonymous volume counting: only tallies tool executions and transport methods.
   - Asynchronous GA4 Measurement Protocol dispatcher sending `mcp_tool_usage` events when `GA4_API_SECRET` is configured.
   - Brand-compliant web dashboard rendered at `/stats` and raw JSON API feed at `/api/stats`.
