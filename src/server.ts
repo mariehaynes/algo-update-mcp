@@ -206,13 +206,25 @@ app.get('/sse', async (req, res) => {
 app.post(['/messages', '/sse'], async (req, res) => {
   const sessionId = req.query.sessionId as string;
   let transport = sessionId ? transports.get(sessionId) : undefined;
-  if (!transport && transports.size > 0) {
-    // Fallback to the latest active transport if sessionId omitted
+  if (!transport && transports.size > 0 && req.path === '/messages') {
+    // Fallback to the latest active transport if sessionId omitted for /messages
     transport = Array.from(transports.values()).pop();
   }
 
   if (transport) {
     await transport.handlePostMessage(req, res, req.body);
+  } else if (req.path === '/sse') {
+    // If a client configured serverUrl: "https://algo.mariehaynes.com/sse" and sends an HTTP POST directly
+    // without an SSE listener session (e.g. Antigravity or HTTP clients expecting immediate JSON),
+    // route it to the Streamable HTTP handler instead of failing with 404 or EOF!
+    try {
+      await handleStreamableHttpRequest(req, res);
+    } catch (err: any) {
+      console.error('[SSE Fallback] Error handling POST request:', err);
+      if (!res.headersSent) {
+        res.status(500).json({ jsonrpc: '2.0', error: { code: -32603, message: err?.message || 'Internal error' }, id: null });
+      }
+    }
   } else {
     res.status(404).json({ error: "Session not found or transport disconnected" });
   }
@@ -221,16 +233,40 @@ app.post(['/messages', '/sse'], async (req, res) => {
 // ----------------------------------------------------
 // Modern Streamable HTTP Transport (SEP-2596 Standard)
 // ----------------------------------------------------
-const streamableTransport = new StreamableHTTPServerTransport({
-  sessionIdGenerator: undefined // Stateless mode: perfect for serverless Cloud Run
-});
-const streamableServer = createMcpServer('streamable_http');
-streamableServer.connect(streamableTransport).catch(err => {
-  console.error("[StreamableHTTP] Error connecting to server:", err);
-});
+async function handleStreamableHttpRequest(req: express.Request, res: express.Response): Promise<void> {
+  // Normalize Accept header:
+  // The MCP SDK strictly requires both 'application/json' AND 'text/event-stream' in the Accept header.
+  // Many clients (including Antigravity, Cursor, and standard HTTP tools) send only
+  // 'application/json' or '*/*' or omit it entirely. Normalizing this prevents 406 Not Acceptable errors.
+  let accept = req.headers.accept || '';
+  if (!accept.includes('application/json')) {
+    accept = accept ? `${accept}, application/json` : 'application/json';
+  }
+  if (!accept.includes('text/event-stream')) {
+    accept = `${accept}, text/event-stream`;
+  }
+  req.headers.accept = accept;
+
+  // In stateless mode, the MCP SDK requires a fresh transport per request to prevent message ID collisions
+  // and handle multiple concurrent AI agent connections cleanly on Cloud Run.
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+    enableJsonResponse: true
+  });
+  const server = createMcpServer('streamable_http');
+  await server.connect(transport);
+  await transport.handleRequest(req, res, req.body);
+}
 
 app.all(['/mcp', '/v1/mcp'], async (req, res) => {
-  await streamableTransport.handleRequest(req, res, req.body);
+  try {
+    await handleStreamableHttpRequest(req, res);
+  } catch (err: any) {
+    console.error('[StreamableHTTP] Error handling request:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ jsonrpc: '2.0', error: { code: -32603, message: err?.message || 'Internal error' }, id: null });
+    }
+  }
 });
 
 // ----------------------------------------------------
@@ -1013,15 +1049,16 @@ Please merge the new "marie-haynes-algo" server into my file. Ensure all JSON br
           Open Antigravity settings or edit your MCP configuration file.
         </li>
         <li data-step="2">
-          Add <code>marie-haynes-algo</code> to your <code>mcp_servers</code> (supports modern Streamable HTTP <code>/mcp</code> or legacy <code>/sse</code>):
+          Add <code>marie-haynes-algo</code> to your <code>mcpServers</code> configuration (in <code>~/.gemini/antigravity/mcp_config.json</code>):
           <div style="position: relative;">
             <button class="copy-btn" onclick="copySnippet('agyConfig')">Copy JSON</button>
             <pre><code id="agyConfig">{
   "marie-haynes-algo": {
-    "url": "https://algo.mariehaynes.com/mcp"
+    "serverUrl": "https://algo.mariehaynes.com/mcp"
   }
 }</code></pre>
           </div>
+          <p style="font-size: 0.85rem; color: #666; margin-top: 6px;">Both <code>serverUrl</code> and <code>url</code> are supported, and you can connect to either <code>/mcp</code> or <code>/sse</code>.</p>
         </li>
         <li data-step="3">
           Your agents will automatically discover the four algorithm tools to diagnose traffic drops and explain search changes.
