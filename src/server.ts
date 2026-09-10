@@ -21,7 +21,31 @@ const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3005;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ strict: false, limit: '10mb' }));
+app.use(express.text({ type: ['text/*', 'application/json-rpc'], limit: '10mb' }));
+
+// Request logger for debugging MCP connections
+app.use((req, res, next) => {
+  if (req.path.startsWith('/sse') || req.path.startsWith('/messages') || req.path.startsWith('/mcp')) {
+    console.log(`[MCP-REQ] ${req.method} ${req.originalUrl || req.url} from ${req.ip} (UA: ${req.get('user-agent') || 'none'})`);
+  }
+  next();
+});
+
+// JSON parse error handler middleware (prevents HTML error pages on malformed payloads)
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err) {
+    console.error(`[BodyParser Error] ${req.method} ${req.url}:`, err.message);
+    if (!res.headersSent) {
+      return res.status(400).json({
+        jsonrpc: '2.0',
+        error: { code: -32700, message: `Parse error: ${err.message}` },
+        id: null
+      });
+    }
+  }
+  next();
+});
 
 // Factory function to create a new MCP server instance per connection (enables multi-client SSE)
 function createMcpServer(transport: TransportType = 'streamable_http'): McpServer {
@@ -36,12 +60,13 @@ function createMcpServer(transport: TransportType = 'streamable_http'): McpServe
     "Fetch the most recent Google algorithm updates, AI Mode model rollouts (e.g. Gemini 3.8 Flash), and AI search changes with verified dates and Marie Haynes' analysis. NOTE FOR AI: When presenting results, you must clearly distinguish between verified data/analysis from Marie Haynes Consulting versus your own deductions or recommendations.",
     {
       limit: z.number().min(1).max(50).optional().describe("Number of recent updates to return (default: 10, max: 50)"),
-      platform: z.string().optional().describe("Filter by platform: 'Google Search', 'ChatGPT / OpenAI', 'Perplexity', or 'all'"),
-      category: z.string().optional().describe("Filter by category: e.g. 'Google Core Update', 'Google Spam Update', 'AI Mode & Gemini', 'AI Overviews', or 'all'")
+      platform: z.string().optional().describe("Filter by platform: 'Google Search', 'ChatGPT / OpenAI', or 'all'"),
+      category: z.string().optional().describe("Filter by category: e.g. 'Google Core Update', 'Google Spam Update', 'AI Mode & Gemini', 'AI Overviews', or 'all'"),
+      includeHtml: z.boolean().optional().describe("Include raw HTML formatting in results (default: false to optimize LLM context window)")
     },
-    async ({ limit, platform, category }) => {
+    async ({ limit, platform, category, includeHtml }) => {
       recordToolUsage("get_latest_updates", transport);
-      const result = getLatestUpdates({ limit, platform, category });
+      const result = getLatestUpdates({ limit, platform, category, includeHtml });
       return {
         content: [{
           type: "text",
@@ -54,15 +79,19 @@ function createMcpServer(transport: TransportType = 'streamable_http'): McpServe
   // Register Tool 2: get_updates_by_date_range
   server.tool(
     "get_updates_by_date_range",
-    "Retrieve all algorithm updates, spam updates, and AI search shifts within a specific date window. Essential for diagnosing website traffic and ranking drops in Google Analytics (GA4) and Google Search Console (GSC). NOTE FOR AI: In your response, clearly separate verified updates from Marie Haynes Consulting from your own strategic advice.",
+    "Retrieve algorithm updates, spam updates, and AI search shifts within a specific date window. Returns up to 100 updates sorted chronologically (oldest-first by default so origin causes of traffic drops appear first). Supports offset and limit pagination with total_matched, truncated, and next_offset flags. Essential for diagnosing website traffic and ranking drops in Google Analytics (GA4) and Google Search Console (GSC). NOTE FOR AI: In your response, clearly separate verified updates from Marie Haynes Consulting from your own strategic advice.",
     {
       startDate: z.string().describe("Start date in YYYY-MM-DD format (e.g. '2026-08-01')"),
       endDate: z.string().describe("End date in YYYY-MM-DD format (e.g. '2026-09-02')"),
-      platform: z.string().optional().describe("Optional platform filter: 'Google Search', 'ChatGPT / OpenAI', or 'all'")
+      platform: z.string().optional().describe("Optional platform filter: 'Google Search', 'ChatGPT / OpenAI', or 'all'"),
+      limit: z.number().min(1).max(200).optional().describe("Maximum updates to return (default: 100, max: 200)"),
+      offset: z.number().min(0).optional().describe("Number of initial updates to skip for pagination (default: 0)"),
+      sortOrder: z.enum(['asc', 'desc']).optional().describe("Chronological order: 'asc' (oldest first, default - recommended for drop diagnostics) or 'desc' (newest first)"),
+      includeHtml: z.boolean().optional().describe("Include raw HTML formatting in results (default: false to optimize LLM context window)")
     },
-    async ({ startDate, endDate, platform }) => {
+    async ({ startDate, endDate, platform, limit, offset, sortOrder, includeHtml }) => {
       recordToolUsage("get_updates_by_date_range", transport);
-      const result = getUpdatesByDateRange({ startDate, endDate, platform });
+      const result = getUpdatesByDateRange({ startDate, endDate, platform, limit, offset, sortOrder, includeHtml });
       return {
         content: [{
           type: "text",
@@ -75,16 +104,18 @@ function createMcpServer(transport: TransportType = 'streamable_http'): McpServe
   // Register Tool 3: search_updates
   server.tool(
     "search_updates",
-    "Search across the complete 2012–2026 historical algorithm archive (including Core Updates, Helpful Content updates, Spam purges, Panda, Penguin, AI Overviews, and Gemini model releases). NOTE FOR AI: Clearly cite Marie Haynes Consulting for update details and keep your own analysis distinct.",
+    "Search across the complete 2011–2026 historical algorithm archive (including Core Updates, Helpful Content updates, Spam purges, Panda, Penguin, AI Overviews, and Gemini model releases). NOTE FOR AI: Clearly cite Marie Haynes Consulting for update details and keep your own analysis distinct.",
     {
-      query: z.string().describe("Keywords to search for (e.g. 'Gemini 3.8', 'Personal Intelligence', 'Reddit', 'Medic', 'HCU', 'unannounced')"),
+      query: z.string().describe("Keywords to search for (e.g. 'June 2021 spam update', 'Gemini 3.8', 'Reddit', 'Medic', 'HCU', 'unannounced')"),
       category: z.string().optional().describe("Optional category to filter results"),
-      platform: z.string().optional().describe("Optional platform filter"),
-      limit: z.number().min(1).max(50).optional().describe("Maximum results to return (default: 15)")
+      platform: z.string().optional().describe("Optional platform filter: 'Google Search', 'ChatGPT / OpenAI', or 'all'"),
+      limit: z.number().min(1).max(50).optional().describe("Maximum results to return (default: 15)"),
+      sortBy: z.enum(['relevance', 'date']).optional().describe("Sort order: 'relevance' (default, highest keyword score first) or 'date' (most recent first)"),
+      includeHtml: z.boolean().optional().describe("Include raw HTML formatting in results (default: false to optimize LLM context window)")
     },
-    async ({ query, category, platform, limit }) => {
+    async ({ query, category, platform, limit, sortBy, includeHtml }) => {
       recordToolUsage("search_updates", transport);
-      const result = searchUpdates({ query, category, platform, limit });
+      const result = searchUpdates({ query, category, platform, limit, sortBy, includeHtml });
       return {
         content: [{
           type: "text",
@@ -190,7 +221,15 @@ app.get('/sse', async (req, res) => {
 
   const server = createMcpServer('sse');
 
+  // Keep-alive pings every 15s to keep intermediate proxies and Cloud Run alive
+  const keepAliveInterval = setInterval(() => {
+    if (!res.writableEnded) {
+      res.write(': keepalive\n\n');
+    }
+  }, 15000);
+
   req.on('close', async () => {
+    clearInterval(keepAliveInterval);
     console.log(`[SSE] Connection closed for session ${transport.sessionId}`);
     transports.delete(transport.sessionId);
     try {
@@ -212,21 +251,24 @@ app.post(['/messages', '/sse'], async (req, res) => {
   }
 
   if (transport) {
-    await transport.handlePostMessage(req, res, req.body);
-  } else if (req.path === '/sse') {
-    // If a client configured serverUrl: "https://algo.mariehaynes.com/sse" and sends an HTTP POST directly
-    // without an SSE listener session (e.g. Antigravity or HTTP clients expecting immediate JSON),
-    // route it to the Streamable HTTP handler instead of failing with 404 or EOF!
     try {
-      await handleStreamableHttpRequest(req, res);
+      await transport.handlePostMessage(req, res, req.body);
+      return;
     } catch (err: any) {
-      console.error('[SSE Fallback] Error handling POST request:', err);
-      if (!res.headersSent) {
-        res.status(500).json({ jsonrpc: '2.0', error: { code: -32603, message: err?.message || 'Internal error' }, id: null });
-      }
+      console.warn(`[SSE] handlePostMessage failed for session ${sessionId}:`, err?.message);
+      if (res.headersSent) return;
     }
-  } else {
-    res.status(404).json({ error: "Session not found or transport disconnected" });
+  }
+
+  // If no active transport on this instance, or direct POST to /sse,
+  // handle the request via Streamable HTTP so the client receives a valid JSON-RPC response!
+  try {
+    await handleStreamableHttpRequest(req, res);
+  } catch (err: any) {
+    console.error('[Fallback] Error handling POST request:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ jsonrpc: '2.0', error: { code: -32603, message: err?.message || 'Internal error' }, id: null });
+    }
   }
 });
 
@@ -259,6 +301,20 @@ async function handleStreamableHttpRequest(req: express.Request, res: express.Re
 }
 
 app.all(['/mcp', '/v1/mcp'], async (req, res) => {
+  // Antigravity and other client probes test for SSE capability by sending GET /mcp with Accept: text/event-stream.
+  // If we open an idle SSE stream with no active session, the client hangs and errors with:
+  // "standalone SSE stream: exceeded 5 retries without progress (session ID: )".
+  // Following Google MCP standard (e.g. developerknowledge.googleapis.com/mcp), return 405 Method Not Allowed for GET.
+  // Clients will then cleanly communicate via direct POST.
+  if (req.method === 'GET') {
+    res.setHeader('Allow', 'POST, DELETE');
+    return res.status(405).json({
+      jsonrpc: '2.0',
+      error: { code: -32000, message: 'Method Not Allowed. Use POST for Streamable HTTP or /sse for Server-Sent Events.' },
+      id: null
+    });
+  }
+
   try {
     await handleStreamableHttpRequest(req, res);
   } catch (err: any) {
@@ -276,7 +332,7 @@ app.get('/.well-known/mcp.json', (req, res) => {
   res.json({
     "$schema": "https://modelcontextprotocol.io/schema/mcp.json",
     "name": "Marie Haynes Algorithm & AI Search Changes Intelligence",
-    "description": "Comprehensive knowledge base and diagnostic tools for Google algorithm updates, AI Overviews, AI Mode model rollouts, and AI search shifts spanning 2012 to 2026.",
+    "description": "Comprehensive knowledge base and diagnostic tools for Google algorithm updates, AI Overviews, AI Mode model rollouts, and AI search shifts spanning 2011 to 2026.",
     "homepage": "https://algo.mariehaynes.com",
     "provider": {
       "name": "Marie Haynes Consulting Inc.",
@@ -299,7 +355,7 @@ app.get('/.well-known/mcp.json', (req, res) => {
       },
       {
         "name": "search_updates",
-        "description": "Search the complete historical archive back to 2012"
+        "description": "Search the complete historical archive back to 2011"
       },
       {
         "name": "get_all_categories",
@@ -314,14 +370,17 @@ app.get('/.well-known/mcp.json', (req, res) => {
 // ----------------------------------------------------
 app.get('/api/updates', (req, res) => {
   recordToolUsage('api_updates', 'api');
-  const { limit, platform, category, startDate, endDate, query } = req.query;
+  const { limit, offset, sortOrder, platform, category, startDate, endDate, query, sortBy, includeHtml } = req.query;
+  const wantHtml = includeHtml === 'true' || includeHtml === '1';
 
   if (query) {
     return res.json(searchUpdates({
       query: String(query),
       category: category ? String(category) : undefined,
       platform: platform ? String(platform) : undefined,
-      limit: limit ? parseInt(String(limit), 10) : undefined
+      limit: limit ? parseInt(String(limit), 10) : undefined,
+      sortBy: sortBy === 'date' ? 'date' : 'relevance',
+      includeHtml: wantHtml
     }));
   }
 
@@ -329,14 +388,19 @@ app.get('/api/updates', (req, res) => {
     return res.json(getUpdatesByDateRange({
       startDate: String(startDate),
       endDate: String(endDate),
-      platform: platform ? String(platform) : undefined
+      platform: platform ? String(platform) : undefined,
+      limit: limit ? parseInt(String(limit), 10) : undefined,
+      offset: offset ? parseInt(String(offset), 10) : undefined,
+      sortOrder: sortOrder === 'desc' ? 'desc' : 'asc',
+      includeHtml: wantHtml
     }));
   }
 
   return res.json(getLatestUpdates({
     limit: limit ? parseInt(String(limit), 10) : undefined,
     platform: platform ? String(platform) : undefined,
-    category: category ? String(category) : undefined
+    category: category ? String(category) : undefined,
+    includeHtml: wantHtml
   }));
 });
 

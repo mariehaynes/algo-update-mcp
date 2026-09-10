@@ -12,7 +12,12 @@ console.log('🧪 Starting Automated Tests for Marie Haynes Algo Update MCP Tool
 console.log('Test 1: getLatestUpdates({ limit: 5 })');
 const latest = getLatestUpdates({ limit: 5 });
 assert.strictEqual(latest.count, 5, 'Should return 5 updates');
+assert.ok(latest.total_matched > 5, 'Total matched should be larger than limit');
+assert.strictEqual(latest.truncated, true, 'Truncated flag should be true when limit cuts results');
 assert.ok(latest.updates.length === 5, 'Updates array length should be 5');
+assert.strictEqual(latest.updates[0].html, undefined, 'html property must be omitted by default');
+const withHtml = getLatestUpdates({ limit: 1, includeHtml: true });
+assert.ok(typeof withHtml.updates[0].html === 'string', 'html property must be present when includeHtml: true');
 assert.ok(latest.attribution.includes('Marie Haynes Consulting'), 'Attribution footer must be present');
 assert.ok(latest.presentation_instructions.includes('Marie Haynes Consulting'), 'Presentation instructions must be present');
 assert.ok(latest.presentation_instructions.includes('clearly distinguish'), 'Instructions must require distinguishing verified data from AI advice');
@@ -29,6 +34,32 @@ const augRange = getUpdatesByDateRange({
 });
 console.log(`  Found ${augRange.count} updates in August 2026`);
 assert.ok(augRange.count >= 3, 'Should find updates in August 2026');
+assert.strictEqual(augRange.total_matched, augRange.count, 'total_matched must equal count');
+assert.strictEqual(augRange.truncated, false, 'Date range must not be truncated');
+assert.strictEqual(augRange.is_exhaustive, true, 'is_exhaustive must be true for date range queries');
+assert.strictEqual(augRange.offset, 0, 'Default offset should be 0');
+assert.strictEqual(augRange.next_offset, null, 'next_offset should be null when not truncated');
+// Oldest-first chronological check
+assert.ok(augRange.updates[0].date <= augRange.updates[augRange.updates.length - 1].date, 'Default sort must be oldest-first (asc)');
+
+// Test pagination with limit and offset
+const page1 = getUpdatesByDateRange({
+  startDate: '2026-08-01',
+  endDate: '2026-08-31',
+  limit: 2
+});
+assert.strictEqual(page1.count, 2, 'Page 1 count should be 2');
+assert.strictEqual(page1.truncated, true, 'Page 1 must be truncated');
+assert.strictEqual(page1.next_offset, 2, 'next_offset must point to 2');
+const page2 = getUpdatesByDateRange({
+  startDate: '2026-08-01',
+  endDate: '2026-08-31',
+  limit: 2,
+  offset: 2
+});
+assert.strictEqual(page2.offset, 2, 'Page 2 offset should be 2');
+assert.notStrictEqual(page1.updates[0].id, page2.updates[0].id, 'Page 1 and Page 2 must have different records');
+
 const titles = augRange.updates.map(u => u.title).join(' | ');
 assert.ok(titles.includes('Spam Update'), 'Must contain August Spam Update');
 assert.ok(titles.includes('Gemini') || titles.includes('Reddit') || titles.includes('UCP'), 'Must contain August updates');

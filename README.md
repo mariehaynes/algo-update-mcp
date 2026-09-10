@@ -11,13 +11,13 @@
 >   This repository is an **open reference architecture and educational blueprint** showing how I designed, structured, and deployed a production-grade MCP knowledge server. You can explore the codebase to see how to handle dual transports (Streamable HTTP + SSE), implement Open Knowledge Format (OKF) data structures, build privacy-first telemetry, and prompt LLMs to separate verified facts from AI speculation.
 >
 > - **Dataset Notice:**  
->   This public repository includes a **sample mock dataset** (`sample-okf/` and `src/data/algo-updates.json` with ~15 sample entries) so you can test the code and see how everything fits together. My complete 15-year proprietary archive of 590+ verified updates (2012–2026) is hosted exclusively on my production server at `algo.mariehaynes.com`. You won't be able to run a duplicate of my full service from this code alone, but you are welcome to use this repository as inspiration to build an MCP server for your own proprietary knowledge or client data!
+>   This public repository includes a **sample mock dataset** (`sample-okf/` and `src/data/algo-updates.json` with ~15 sample entries) so you can test the code and see how everything fits together. My complete 15-year proprietary archive of 550+ verified updates (2011–2026) is hosted exclusively on my production server at `algo.mariehaynes.com`. You won't be able to run a duplicate of my full service from this code alone, but you are welcome to use this repository as inspiration to build an MCP server for your own proprietary knowledge or client data!
 
 ---
 
 ## 1. What the project is
 
-This project is an open-source reference implementation of a **Model Context Protocol (MCP)** knowledge server, modeled on the system I built to deliver Google Algorithm Update intelligence (spanning 2012 to 2026) directly to AI agents.
+This project is an open-source reference implementation of a **Model Context Protocol (MCP)** knowledge server, modeled on the system I built to deliver Google Algorithm Update intelligence (spanning 2011 to 2026) directly to AI agents.
 
 By connecting an MCP server to tools like Claude Desktop, Antigravity, Cursor, and web-based LLMs, AI agents can query structured, verified historical timelines during conversations—such as diagnosing website traffic drops in Google Analytics 4 (GA4) or Google Search Console (GSC).
 
@@ -55,7 +55,7 @@ The system is designed as a standalone, stateless Node.js / TypeScript microserv
 │                                                             │
 │  Tools:                                                     │
 │   • get_latest_updates(limit, platform, category)           │
-│   • get_updates_by_date_range(startDate, endDate, platform) │
+│   • get_updates_by_date_range(startDate, endDate, ...opts)  │
 │   • search_updates(query, category, platform, limit)        │
 │   • get_all_categories()                                    │
 ├─────────────────────────────────────────────────────────────┤
@@ -173,6 +173,11 @@ Open Claude Desktop &rarr; **Settings** (`Cmd + ,` on Mac or `Ctrl + ,` on Windo
 }
 ```
 *Save the file and restart Claude Desktop.*
+
+### Connecting to Claude.ai (Web & Mobile)
+- Go to Claude.ai &rarr; **Settings** &rarr; **Integrations** / **Connectors** (or Feature Previews &rarr; MCP).
+- Add remote MCP server URL: `https://algo.mariehaynes.com/sse`.
+- *Note:* In Claude.ai, tool schemas are bound to the conversation when it is initialized. To pick up updated tool parameters (such as `offset` or `sortOrder`), always start a **new chat session**.
 
 ### Connecting to ChatGPT
 - **ChatGPT Pro / Enterprise / Edu (Developer Mode)**: Settings &rarr; Apps &rarr; Advanced Settings &rarr; Developer Mode &rarr; Create, and enter `https://algo.mariehaynes.com/sse`.
