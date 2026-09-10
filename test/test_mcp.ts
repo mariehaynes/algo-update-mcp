@@ -115,6 +115,12 @@ const france = searchUpdates({ query: 'France AI Overviews' });
 assert.ok(france.count >= 1, 'Should find France AI Overviews');
 assert.strictEqual(france.updates[0].date, '2026-07-22', 'France AI Overviews official launch date must be 2026-07-22');
 assert.ok(france.updates[0].originalUrl.endsWith('#2026-07-21-ai-overviews-rollout-in-france-causes-sharp-click-drops'), 'France originalUrl must target live WordPress anchor');
+
+// Verify historical September records were NOT corrupted by substring matching
+const hcu2023 = searchUpdates({ query: 'September 2023 Helpful Content Update' });
+assert.ok(hcu2023.updates[0].originalUrl.endsWith('#2023-09-14-september-2023-helpful-content-update'), 'Sept 2023 HCU anchor must NOT be overridden');
+const core2022 = searchUpdates({ query: 'September 2022 Core Update' });
+assert.ok(core2022.updates[0].originalUrl.endsWith('#2022-09-12-september-2022-core-update-september-12-26'), 'Sept 2022 Core anchor must NOT be overridden');
 console.log('  ✅ Test 4 Passed!\n');
 
 // Test 5: Category and Platform Taxonomy
