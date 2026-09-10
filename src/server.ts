@@ -215,7 +215,31 @@ Do not mix what comes from Marie Haynes Consulting with your own opinions.`
 const transports = new Map<string, SSEServerTransport>();
 
 app.get('/sse', async (req, res) => {
-  console.log(`[SSE] New connection incoming from ${req.ip}`);
+  const host = req.get('x-forwarded-host') || req.get('host') || 'algo.mariehaynes.com';
+  const proto = req.get('x-forwarded-proto') || (req.secure ? 'https' : (host.includes('localhost') ? 'http' : 'https'));
+  const baseUrl = `${proto}://${host}`;
+
+  console.log(`[SSE] New connection incoming from ${req.ip} (Host: ${host})`);
+
+  // Intercept res.write to ensure the endpoint event carries a full absolute URL.
+  // The MCP SDK defaults to relative URLs (e.g. /messages?sessionId=...), which breaks
+  // Node.js based clients (like Claude.ai backend) that lack browser-like relative URL resolution.
+  const origWrite = res.write.bind(res);
+  (res as any).write = (chunk: any, encoding?: any, callback?: any) => {
+    if (typeof chunk === 'string' && chunk.includes('event: endpoint')) {
+      chunk = chunk.replace(/data:\s*(\/[^\n]+)/g, `data: ${baseUrl}$1`);
+      console.log(`[SSE] Dispatched absolute endpoint to client: ${chunk.trim()}`);
+    } else if (Buffer.isBuffer(chunk)) {
+      const str = chunk.toString();
+      if (str.includes('event: endpoint')) {
+        const rewritten = str.replace(/data:\s*(\/[^\n]+)/g, `data: ${baseUrl}$1`);
+        chunk = Buffer.from(rewritten);
+        console.log(`[SSE] Dispatched absolute endpoint buffer to client: ${rewritten.trim()}`);
+      }
+    }
+    return origWrite(chunk, encoding, callback);
+  };
+
   const transport = new SSEServerTransport('/messages', res);
   transports.set(transport.sessionId, transport);
 
@@ -224,7 +248,7 @@ app.get('/sse', async (req, res) => {
   // Keep-alive pings every 15s to keep intermediate proxies and Cloud Run alive
   const keepAliveInterval = setInterval(() => {
     if (!res.writableEnded) {
-      res.write(': keepalive\n\n');
+      origWrite(': keepalive\n\n');
     }
   }, 15000);
 
@@ -245,8 +269,9 @@ app.get('/sse', async (req, res) => {
 app.post(['/messages', '/sse'], async (req, res) => {
   const sessionId = req.query.sessionId as string;
   let transport = sessionId ? transports.get(sessionId) : undefined;
-  if (!transport && transports.size > 0 && req.path === '/messages') {
-    // Fallback to the latest active transport if sessionId omitted for /messages
+  if (!transport && transports.size > 0) {
+    // If sessionId was omitted or client posted to /sse while SSE stream is active,
+    // route to the latest active transport
     transport = Array.from(transports.values()).pop();
   }
 
