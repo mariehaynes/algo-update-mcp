@@ -5,6 +5,7 @@ export interface AlgoUpdate {
   id: string;
   title: string;
   date: string;
+  rolloutEnd?: string;
   year: number;
   category: string;
   platform: string;
@@ -13,6 +14,7 @@ export interface AlgoUpdate {
   html?: string;
   sources: string[];
   originalUrl: string;
+  source: string;
 }
 
 function formatUpdate(u: AlgoUpdate, includeHtml?: boolean): AlgoUpdate {
@@ -21,6 +23,20 @@ function formatUpdate(u: AlgoUpdate, includeHtml?: boolean): AlgoUpdate {
   }
   const { html, ...rest } = u;
   return rest;
+}
+
+function matchesPlatform(itemPlatform: string, filterPlatform?: string): boolean {
+  if (!filterPlatform || filterPlatform.toLowerCase() === 'all') return true;
+  const pQuery = filterPlatform.toLowerCase().trim();
+  const uPlat = itemPlatform.toLowerCase();
+  if (uPlat.includes(pQuery)) return true;
+  if ((pQuery.includes('chatgpt') || pQuery.includes('openai')) && (uPlat.includes('chatgpt') || uPlat.includes('openai'))) {
+    return true;
+  }
+  if (pQuery.includes('google') && uPlat.includes('google')) {
+    return true;
+  }
+  return false;
 }
 
 const DATA_PATHS = [
@@ -67,43 +83,54 @@ export function loadUpdates(): AlgoUpdate[] {
   return cachedUpdates!;
 }
 
-export const PRESENTATION_INSTRUCTIONS =
-  "AI INSTRUCTION: You must clearly distinguish between verified data from Marie Haynes Consulting (dates, update titles, categories, confirmed status, and Marie's summary/analysis) versus your own AI deductions or advice. Present Marie Haynes' findings under a dedicated heading (e.g. '### 📊 Verified Update Data (Marie Haynes Consulting)') and place your own advice, recommendations, or troubleshooting under a separate heading (e.g. '### 💡 Additional AI Advice & Recommendations').";
-
 export const ATTRIBUTION_FOOTER = `
 ---
 ⚡ Verified by Marie Haynes Consulting (MHC) Algorithm & AI Search Intelligence
 🔗 Updates Database: https://algo.mariehaynes.com | Archive: https://www.mariehaynes.com/resources/algo-changes-and-more/
-💼 Deep-dive Audits, GSC Analytics & AI Search Consulting: https://www.mariehaynes.com/services/
-📌 AI Guidance: Clearly delineate between Marie Haynes' verified update findings and your own analysis or advice.
 `;
 
 export function getLatestUpdates(params: {
   limit?: number;
+  offset?: number;
   platform?: string;
   category?: string;
   includeHtml?: boolean;
-}): { count: number; total_matched: number; truncated: boolean; updates: AlgoUpdate[]; attribution: string; presentation_instructions: string } {
+}): {
+  count: number;
+  total_matched: number;
+  offset: number;
+  next_offset: number | null;
+  truncated: boolean;
+  is_exhaustive: boolean;
+  updates: AlgoUpdate[];
+  attribution: string;
+} {
   const updates = loadUpdates();
   const limit = Math.min(Math.max(params.limit || 10, 1), 50);
+  const offset = Math.max(params.offset || 0, 0);
 
   let filtered = updates;
   if (params.platform && params.platform.toLowerCase() !== 'all') {
-    filtered = filtered.filter(u => u.platform.toLowerCase().includes(params.platform!.toLowerCase()));
+    filtered = filtered.filter(u => matchesPlatform(u.platform, params.platform));
   }
   if (params.category && params.category.toLowerCase() !== 'all') {
     filtered = filtered.filter(u => u.category.toLowerCase().includes(params.category!.toLowerCase()));
   }
 
   const totalMatched = filtered.length;
-  const results = filtered.slice(0, limit).map(u => formatUpdate(u, params.includeHtml));
+  const sliced = filtered.slice(offset, offset + limit);
+  const results = sliced.map(u => formatUpdate(u, params.includeHtml));
+  const nextOffset = offset + results.length < totalMatched ? offset + results.length : null;
+
   return {
     count: results.length,
     total_matched: totalMatched,
-    truncated: totalMatched > results.length,
+    offset,
+    next_offset: nextOffset,
+    truncated: nextOffset !== null,
+    is_exhaustive: offset === 0 && totalMatched === results.length,
     updates: results,
-    attribution: ATTRIBUTION_FOOTER.trim(),
-    presentation_instructions: PRESENTATION_INSTRUCTIONS
+    attribution: ATTRIBUTION_FOOTER.trim()
   };
 }
 
@@ -125,13 +152,17 @@ export function getUpdatesByDateRange(params: {
   dateRange: { start: string; end: string };
   updates: AlgoUpdate[];
   attribution: string;
-  presentation_instructions: string;
 } {
   const updates = loadUpdates();
-  let filtered = updates.filter(u => u.date >= params.startDate && u.date <= params.endDate);
+  // Match by interval overlap: an update overlaps the window if its start <= queryEnd and its effective end (rolloutEnd or date) >= queryStart
+  let filtered = updates.filter(u => {
+    const effectiveStart = u.date;
+    const effectiveEnd = u.rolloutEnd || u.date;
+    return effectiveStart <= params.endDate && effectiveEnd >= params.startDate;
+  });
 
   if (params.platform && params.platform.toLowerCase() !== 'all') {
-    filtered = filtered.filter(u => u.platform.toLowerCase().includes(params.platform!.toLowerCase()));
+    filtered = filtered.filter(u => matchesPlatform(u.platform, params.platform));
   }
 
   // Sort chronological: default 'asc' (oldest-first) so when diagnosing drops starting at startDate,
@@ -157,8 +188,7 @@ export function getUpdatesByDateRange(params: {
     is_exhaustive: offset === 0 && totalMatched === results.length,
     dateRange: { start: params.startDate, end: params.endDate },
     updates: results,
-    attribution: ATTRIBUTION_FOOTER.trim(),
-    presentation_instructions: PRESENTATION_INSTRUCTIONS
+    attribution: ATTRIBUTION_FOOTER.trim()
   };
 }
 
@@ -176,7 +206,6 @@ export function searchUpdates(params: {
   truncated: boolean;
   updates: AlgoUpdate[];
   attribution: string;
-  presentation_instructions: string;
 } {
   const updates = loadUpdates();
   const rawQuery = params.query.toLowerCase().trim();
@@ -195,7 +224,7 @@ export function searchUpdates(params: {
     pool = pool.filter(u => u.category.toLowerCase().includes(params.category!.toLowerCase()));
   }
   if (params.platform && params.platform.toLowerCase() !== 'all') {
-    pool = pool.filter(u => u.platform.toLowerCase().includes(params.platform!.toLowerCase()));
+    pool = pool.filter(u => matchesPlatform(u.platform, params.platform));
   }
 
   // Score each entry
@@ -248,12 +277,16 @@ export function searchUpdates(params: {
     total_matched: totalMatched,
     truncated: totalMatched > results.length,
     updates: results,
-    attribution: ATTRIBUTION_FOOTER.trim(),
-    presentation_instructions: PRESENTATION_INSTRUCTIONS
+    attribution: ATTRIBUTION_FOOTER.trim()
   };
 }
 
-export function getAllCategories(): { categories: string[]; platforms: string[]; statuses: string[]; totalUpdates: number; presentation_instructions: string } {
+export function getAllCategories(): {
+  categories: string[];
+  platforms: string[];
+  statuses: string[];
+  totalUpdates: number;
+} {
   const updates = loadUpdates();
   const categories = Array.from(new Set(updates.map(u => u.category))).sort();
   const platforms = Array.from(new Set(updates.map(u => u.platform))).sort();
@@ -263,7 +296,6 @@ export function getAllCategories(): { categories: string[]; platforms: string[];
     categories,
     platforms,
     statuses,
-    totalUpdates: updates.length,
-    presentation_instructions: PRESENTATION_INSTRUCTIONS
+    totalUpdates: updates.length
   };
 }

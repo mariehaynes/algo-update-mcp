@@ -54,7 +54,7 @@ The system is designed as a standalone, stateless Node.js / TypeScript microserv
 │             (@modelcontextprotocol/sdk v1.6+)               │
 │                                                             │
 │  Tools:                                                     │
-│   • get_latest_updates(limit, platform, category)           │
+│   • get_latest_updates(limit, offset, platform, category)   │
 │   • get_updates_by_date_range(startDate, endDate, ...opts)  │
 │   • search_updates(query, category, platform, limit)        │
 │   • get_all_categories()                                    │

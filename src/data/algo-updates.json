@@ -4,7 +4,7 @@
     "title": "OpenAI Launches ChatGPT Images 2.5 with New Sketch Feature",
     "date": "2026-09-08",
     "year": 2026,
-    "category": "AI Mode & Gemini",
+    "category": "ChatGPT & OpenAI",
     "platform": "ChatGPT / OpenAI",
     "status": "Confirmed",
     "summary": "OpenAI released ChatGPT Images 2.5 - faster, sharper, smarter. Also you can use sketch to draw in ChatGPT and it will turn it into an image for you.",
@@ -13,29 +13,15 @@
       "https://openai.com/index/introducing-chatgpt-images-2-5/",
       "https://community.mariehaynes.com/posts/107075900"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-09-08-openai-launches-chatgpt-images-2-5-with-new-sketch-feature"
-  },
-  {
-    "id": "2026-09-08-significant-search-ranking-volatility-detected-on-september-2",
-    "title": "Significant Search Ranking Volatility Detected on September 2",
-    "date": "2026-09-08",
-    "year": 2026,
-    "category": "Search Algorithm Update",
-    "platform": "Google Search",
-    "status": "Confirmed",
-    "summary": "I am noticing significant ranking or traffic changes on September 2 for many different sites I monitor.\nNo official update was announced. On Sep 3 Gemini 3.8 Flash came out and was announced to be available in AI Mode, but these ranking changes don't seem limited to AI Mode.\n\nI think it's possible that the new Gemini 3.8 Flash model changed the capabilities of AI models involved in Search systems such as RankBrain, but this is a guess. Still, noting this here as there are a large number of sites with update-like movement.",
-    "html": "<strong>September 8, 2026</strong>: <strong>Significant Search Ranking Volatility Detected on September 2</strong>. I am noticing significant ranking or traffic changes on September 2 for many different sites I monitor.\nNo official update was announced. On Sep 3 Gemini 3.8 Flash came out and was announced to be available in AI Mode, but these ranking changes don't seem limited to AI Mode.\n\nI think it's possible that the new Gemini 3.8 Flash model changed the capabilities of AI models involved in Search systems such as RankBrain, but this is a guess. Still, noting this here as there are a large number of sites with update-like movement.",
-    "sources": [
-      "https://community.mariehaynes.com/posts/107076315"
-    ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-09-08-significant-search-ranking-volatility-detected-on-september-2"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-09-08-openai-launches-chatgpt-images-2-5-with-new-sketch-feature",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2026-09-03-openai-launches-gpt-6-astra-calling-it-the-dawn-of-the-agi-era",
     "title": "OpenAI Launches GPT-6 Astra calling it The Dawn of the AGI Era?",
     "date": "2026-09-03",
     "year": 2026,
-    "category": "AI Mode & Gemini",
+    "category": "ChatGPT & OpenAI",
     "platform": "ChatGPT / OpenAI",
     "status": "Confirmed",
     "summary": "OpenAI has released GPT-6 Astra. It's really good on computer use, browsing, software engineering, cybersecurity, science and professional work. All of the paid ChatGPT plans have access. \n\nIt scores 99.9% on the ARC-AGI-3 benchmark. This doesn't mean it's AGI, but it scores better than other models. The next closest is Opus 5 at 30.2%",
@@ -44,7 +30,24 @@
       "https://openai.com/index/gpt-6-astra/",
       "https://community.mariehaynes.com/posts/106879190"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-09-03-openai-launches-gpt-6-astra-calling-it-the-dawn-of-the-agi-era"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-09-03-openai-launches-gpt-6-astra-calling-it-the-dawn-of-the-agi-era",
+    "source": "Marie Haynes Consulting"
+  },
+  {
+    "id": "2026-09-02-significant-search-ranking-volatility-detected-on-september-2",
+    "title": "Significant Search Ranking Volatility Detected on September 2",
+    "date": "2026-09-02",
+    "year": 2026,
+    "category": "Search Algorithm Update",
+    "platform": "Google Search",
+    "status": "Confirmed",
+    "summary": "Observed on September 2, 2026: I noticed significant ranking or traffic changes on September 2 for many different sites I monitor.\nNo official update was announced. On Sep 3 Gemini 3.8 Flash came out and was announced to be available in AI Mode, but these ranking changes don't seem limited to AI Mode.\n\nI think it's possible that the new Gemini 3.8 Flash model changed the capabilities of AI models involved in Search systems such as RankBrain, but this is a guess. Still, noting this here as there are a large number of sites with update-like movement (analyzed in MHC community post on September 8).",
+    "html": "<strong>September 8, 2026</strong>: <strong>Significant Search Ranking Volatility Detected on September 2</strong>. I am noticing significant ranking or traffic changes on September 2 for many different sites I monitor.\nNo official update was announced. On Sep 3 Gemini 3.8 Flash came out and was announced to be available in AI Mode, but these ranking changes don't seem limited to AI Mode.\n\nI think it's possible that the new Gemini 3.8 Flash model changed the capabilities of AI models involved in Search systems such as RankBrain, but this is a guess. Still, noting this here as there are a large number of sites with update-like movement.",
+    "sources": [
+      "https://community.mariehaynes.com/posts/107076315"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-09-02-significant-search-ranking-volatility-detected-on-september-2",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2026-09-02-gemini-3-8-flash-available-in-model-selector-in-search-ai-mode",
@@ -60,7 +63,8 @@
       "https://x.com/rmstein/status/2095176293751124182?s=20",
       "https://community.mariehaynes.com/posts/106814142"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-09-02-gemini-3-8-flash-available-in-model-selector-in-search-ai-mode"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-09-02-gemini-3-8-flash-available-in-model-selector-in-search-ai-mode",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2026-08-31-google-updates-universal-commerce-protocol-ucp-specification",
@@ -75,7 +79,8 @@
     "sources": [
       "https://community.mariehaynes.com/posts/106701112"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-31-google-updates-universal-commerce-protocol-ucp-specification"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-31-google-updates-universal-commerce-protocol-ucp-specification",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2026-08-19-google-search-console-adds-direct-controls-for-generative-ai-visibili",
@@ -90,7 +95,8 @@
     "sources": [
       "https://support.google.com/webmasters/answer/16908024?hl=en-GB"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-19-google-search-console-adds-direct-controls-for-generative-ai-visibili"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-19-google-search-console-adds-direct-controls-for-generative-ai-visibili",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2026-08-19-interactive-visuals-simulations-rolling-out-in-ai-overviews",
@@ -105,7 +111,8 @@
     "sources": [
       "https://community.mariehaynes.com/posts/106201296"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-19-interactive-visuals-simulations-rolling-out-in-ai-overviews"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-19-interactive-visuals-simulations-rolling-out-in-ai-overviews",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2026-08-18-google-launched-the-august-2026-spam-update",
@@ -121,7 +128,9 @@
       "https://developers.google.com/search/docs/appearance/spam-updates",
       "https://www.gsqi.com/marketing-blog/august-2026-google-spam-update-case-studies/"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-18-google-launched-the-august-2026-spam-update"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-18-google-launched-the-august-2026-spam-update",
+    "source": "Marie Haynes Consulting",
+    "rolloutEnd": "2026-08-21"
   },
   {
     "id": "2026-08-18-sharp-drop-in-reddit-citations-across-chatgpt-and-ai-mode",
@@ -129,7 +138,7 @@
     "date": "2026-08-18",
     "year": 2026,
     "category": "AI Overviews",
-    "platform": "Google Search",
+    "platform": "Google Search, ChatGPT / OpenAI",
     "status": "Observed",
     "summary": "Data from Promptwatch showed that ChatGPT has almost entirely stopped citing Reddit. AI Mode is also showing significantly fewer Reddit responses, dropping to just 1.5% of monitored answers over the past 7 days (while AI Overviews citations have decreased only slightly). This represents a notable shift in how generative search engines weight forum and UGC discussions for informational queries.",
     "html": "<strong>August 18, 2026</strong>: <a href=\"https://promptwatch.com/data/reddit-citations-are-dropping-in-chatgpt\"><strong>Data from Promptwatch showed that ChatGPT has almost entirely stopped citing Reddit</strong></a>. AI Mode is also showing significantly fewer Reddit responses, dropping to just 1.5% of monitored answers over the past 7 days (while AI Overviews citations have decreased only slightly). This represents a notable shift in how generative search engines weight forum and UGC discussions for informational queries.",
@@ -137,7 +146,8 @@
       "https://promptwatch.com/data/reddit-citations-are-dropping-in-chatgpt",
       "https://community.mariehaynes.com/posts/106136096"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-18-sharp-drop-in-reddit-citations-across-chatgpt-and-ai-mode"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-18-sharp-drop-in-reddit-citations-across-chatgpt-and-ai-mode",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2026-08-18-gemini-in-chrome-autobrowse-rolls-out-on-android-in-the-us",
@@ -152,7 +162,8 @@
     "sources": [
       "https://community.mariehaynes.com/posts/106142716"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-18-gemini-in-chrome-autobrowse-rolls-out-on-android-in-the-us"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-18-gemini-in-chrome-autobrowse-rolls-out-on-android-in-the-us",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2026-08-14-gemini-3-7-flash-rolling-out-in-ai-mode-for-google-ai-subscribers",
@@ -167,7 +178,8 @@
     "sources": [
       "https://x.com/rmstein/status/2088325481599009146?s=20"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-14-gemini-3-7-flash-rolling-out-in-ai-mode-for-google-ai-subscribers"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-14-gemini-3-7-flash-rolling-out-in-ai-mode-for-google-ai-subscribers",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2026-07-21-ai-overviews-rollout-in-france-causes-sharp-click-drops",
@@ -183,14 +195,15 @@
       "https://x.com/lilyraynyc/status/2095163079856095565?s=20",
       "https://community.mariehaynes.com/posts/106815305"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-07-21-ai-overviews-rollout-in-france-causes-sharp-click-drops"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-07-21-ai-overviews-rollout-in-france-causes-sharp-click-drops",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2026-07-09-chatgpt-shopping-shifts-from-web-scraping-to-internal-product-feeds",
     "title": "ChatGPT Shopping Shifts from Web Scraping to Internal Product Feeds",
     "date": "2026-07-09",
     "year": 2026,
-    "category": "AI Mode & Gemini",
+    "category": "ChatGPT & OpenAI",
     "platform": "ChatGPT / OpenAI",
     "status": "Confirmed",
     "summary": "ChatGPT Shopping abruptly shifted from web scraping to internal product feeds, which now account for 60% of product recommendations. 35% of the feed recommendations are Shopify sites. This change coincided with the launch of GPT-5.6. It impacted the visibility of many products in ChatGPT. This was discovered in research by Profound.",
@@ -199,7 +212,8 @@
       "https://www.tryprofound.com/blog/chatgpt-5.6-shopping-transformation",
       "https://community.mariehaynes.com/posts/107171879"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-07-09-chatgpt-shopping-shifts-from-web-scraping-to-internal-product-feeds"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-07-09-chatgpt-shopping-shifts-from-web-scraping-to-internal-product-feeds",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2026-05-21-new-core-update-went-live",
@@ -216,7 +230,8 @@
       "https://developers.google.com/search/docs/appearance/core-updates",
       "https://developers.google.com/search/docs/fundamentals/ai-optimization-guide"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-05-21-new-core-update-went-live"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-05-21-new-core-update-went-live",
+    "source": "Marie Haynes Consulting"
   },
   {
     "id": "2018-11-04-unannounced-ranking-volatility-november-4-5-2018",
@@ -231,6 +246,8 @@
     "sources": [
       "https://www.mariehaynes.com/newsletter/episode-56/#toc-0"
     ],
-    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2018-11-04-unannounced-ranking-volatility-november-4-5-2018"
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2018-11-04-unannounced-ranking-volatility-november-4-5-2018",
+    "source": "Marie Haynes Consulting",
+    "rolloutEnd": "2018-11-05"
   }
 ]
