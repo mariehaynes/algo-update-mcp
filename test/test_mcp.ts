@@ -109,7 +109,7 @@ console.log('Test 4: Date consistency & live WordPress anchor preservation');
 const septVol = searchUpdates({ query: 'volatility September 2' });
 assert.ok(septVol.count >= 1, 'Should find September 2 volatility');
 assert.strictEqual(septVol.updates[0].date, '2026-09-02', 'Volatility event date must be 2026-09-02');
-assert.ok(septVol.updates[0].originalUrl.endsWith('#2026-09-08-significant-search-ranking-volatility-detected-on-september-2'), 'Sept 2 originalUrl must target live WordPress anchor');
+assert.ok(septVol.updates[0].originalUrl.endsWith('#2026-09-02-significant-search-ranking-volatility-detected-on-september-2'), 'Sept 2 originalUrl must target live WordPress anchor');
 
 const france = searchUpdates({ query: 'France AI Overviews' });
 assert.ok(france.count >= 1, 'Should find France AI Overviews');
