@@ -43,22 +43,49 @@ export function renderStatsHtml(stats: UsageStats): string {
     }
   };
 
-  // Build rolling 14-day history array
-  const last14Days: { date: string; displayDate: string; count: number }[] = [];
+  // Build rolling 14-day history array (UTC-aligned to match telemetry timestamps)
+  const last14Days: { date: string; displayDate: string; shortDay: string; count: number; isToday: boolean }[] = [];
   const now = new Date();
   for (let i = 13; i >= 0; i--) {
     const d = new Date(now);
     d.setDate(d.getDate() - i);
     const key = d.toISOString().slice(0, 10);
-    const display = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const display = d.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' });
+    const shortDay = d.toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short' });
     last14Days.push({
       date: key,
       displayDate: display,
-      count: stats.dailyUsage[key] || 0
+      shortDay: shortDay,
+      count: stats.dailyUsage[key] || 0,
+      isToday: i === 0
     });
   }
 
-  const maxDaily = Math.max(...last14Days.map(d => d.count), 5);
+  const last7Days = last14Days.slice(7);
+  const maxDaily14 = Math.max(...last14Days.map(d => d.count), 5);
+  const maxDaily7 = Math.max(...last7Days.map(d => d.count), 5);
+
+  function renderChartBars(days: typeof last14Days, maxVal: number) {
+    return days.map(item => {
+      const heightPct = item.count > 0 ? Math.max(Math.round((item.count / maxVal) * 100), 8) : 0;
+      return `
+      <div class="bar-col ${item.isToday ? 'is-today' : ''}">
+        <div class="bar-track">
+          <span class="bar-count-label ${item.count > 0 ? 'has-count' : ''}">${item.count > 0 ? item.count.toLocaleString() : '&nbsp;'}</span>
+          <div class="bar-pillar-wrap">
+            ${item.count > 0 
+              ? `<div class="bar-pillar" style="height: ${heightPct}%;" title="${item.date}: ${item.count} queries"></div>` 
+              : `<div class="bar-pillar-zero" title="${item.date}: 0 queries"></div>`
+            }
+          </div>
+        </div>
+        <div class="bar-date-row">
+          <span class="bar-date-label ${item.isToday ? 'today-badge' : ''}" title="${item.date}">${item.isToday ? 'Today' : item.displayDate}</span>
+        </div>
+      </div>
+      `;
+    }).join('');
+  }
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -97,6 +124,7 @@ export function renderStatsHtml(stats: UsageStats): string {
       background-color: var(--bg-light);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
     h1, h2, h3, h4, .brand-font {
       font-family: 'Poppins', sans-serif;
@@ -245,6 +273,7 @@ export function renderStatsHtml(stats: UsageStats): string {
       border-radius: 12px;
       padding: 1.8rem;
       box-shadow: 0 4px 16px rgba(92, 40, 130, 0.04);
+      min-width: 0;
     }
     .panel h2 {
       font-size: 1.25rem;
@@ -255,6 +284,8 @@ export function renderStatsHtml(stats: UsageStats): string {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
     }
     .stat-row {
       margin-bottom: 1.1rem;
@@ -265,16 +296,25 @@ export function renderStatsHtml(stats: UsageStats): string {
       align-items: baseline;
       margin-bottom: 0.35rem;
       font-size: 0.92rem;
+      gap: 8px;
+      flex-wrap: wrap;
     }
     .stat-title {
       font-weight: 600;
       color: var(--brand-charcoal);
+      word-break: break-word;
+      min-width: 0;
+    }
+    .stat-title code {
+      font-size: 0.82rem;
+      word-break: break-all;
     }
     .stat-count {
       font-weight: 700;
       color: var(--brand-deep-purple);
       font-family: monospace;
       font-size: 0.95rem;
+      white-space: nowrap;
     }
     .stat-desc {
       font-size: 0.78rem;
@@ -294,6 +334,7 @@ export function renderStatsHtml(stats: UsageStats): string {
       border-radius: 999px;
       transition: width 0.5s ease;
     }
+
     /* Daily Activity Chart */
     .chart-panel {
       background: var(--card-bg);
@@ -302,56 +343,168 @@ export function renderStatsHtml(stats: UsageStats): string {
       padding: 1.8rem;
       margin-bottom: 2.2rem;
       box-shadow: 0 4px 16px rgba(92, 40, 130, 0.04);
+      min-width: 0;
+      overflow: hidden;
     }
-    .chart-panel h2 {
-      font-size: 1.25rem;
-      color: var(--brand-deep-purple);
+    .chart-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
       margin-bottom: 1.2rem;
       padding-bottom: 0.6rem;
       border-bottom: 2px solid #ede7f4;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    }
+    .chart-panel-header h2 {
+      font-size: 1.25rem;
+      color: var(--brand-deep-purple);
+      margin: 0;
+    }
+    .chart-panel-header .chart-sub {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #716b7e;
+      margin-top: 2px;
+    }
+    .chart-toggle-group {
+      display: inline-flex;
+      background: #f1ecf7;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .chart-toggle-btn {
+      border: none;
+      background: transparent;
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-family: inherit;
+      color: var(--brand-purple);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chart-toggle-btn.active {
+      background: var(--brand-purple);
+      color: #ffffff;
+      box-shadow: 0 1px 4px rgba(92, 40, 130, 0.15);
+    }
+    .chart-toggle-btn:hover:not(.active) {
+      background: rgba(92, 40, 130, 0.08);
     }
     .bar-chart-container {
       display: flex;
       align-items: flex-end;
-      gap: 12px;
-      height: 180px;
-      padding: 1rem 0.5rem 0;
-      border-bottom: 2px solid #ede7f4;
+      gap: 8px;
+      padding: 0.5rem 0 0;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: #d1c4e0 transparent;
+      min-width: 0;
+      width: 100%;
+    }
+    .bar-chart-container::-webkit-scrollbar {
+      height: 5px;
+    }
+    .bar-chart-container::-webkit-scrollbar-thumb {
+      background: #d1c4e0;
+      border-radius: 4px;
     }
     .bar-col {
       flex: 1;
-      min-width: 32px;
+      min-width: 34px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 100%;
+    }
+    .chart-view-7d .bar-col {
+      min-width: 0;
+      flex: 1 1 0;
+    }
+    .bar-track {
+      width: 100%;
+      height: 140px;
+      display: flex;
+      flex-direction: column;
       justify-content: flex-end;
+      align-items: center;
+      border-bottom: 2px solid #ede7f4;
+      padding-bottom: 0;
     }
     .bar-count-label {
       font-size: 0.72rem;
       font-weight: 700;
       color: var(--brand-deep-purple);
       margin-bottom: 4px;
+      min-height: 14px;
+      line-height: 1;
+      font-family: monospace;
+      text-align: center;
+      display: block;
+      width: 100%;
+    }
+    .bar-count-label:not(.has-count) {
+      visibility: hidden;
+    }
+    .bar-pillar-wrap {
+      width: 100%;
+      height: 112px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
     }
     .bar-pillar {
       width: 100%;
-      max-width: 36px;
+      max-width: 32px;
       background: linear-gradient(180deg, var(--brand-orange), var(--brand-purple));
       border-radius: 4px 4px 0 0;
-      min-height: 4px;
+      min-height: 8px;
       transition: height 0.3s ease;
+      cursor: pointer;
+    }
+    .bar-pillar:hover {
+      filter: brightness(1.1);
+    }
+    .bar-pillar-zero {
+      width: 14px;
+      height: 3px;
+      background: #e5dde9;
+      border-radius: 2px;
+    }
+    .bar-date-row {
+      width: 100%;
+      padding-top: 8px;
+      text-align: center;
     }
     .bar-date-label {
       font-size: 0.72rem;
       color: #6a6476;
-      margin-top: 8px;
       white-space: nowrap;
+      display: block;
       text-align: center;
     }
+    .bar-date-label.today-badge {
+      background: #eee6f6;
+      color: var(--brand-purple);
+      font-weight: 700;
+      padding: 1px 3px;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      display: inline-block;
+    }
+    .chart-scroll-hint {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #8c8398;
+      margin-top: 10px;
+    }
+
     /* API Link Box */
     .api-box {
       background: #f7f3fb;
@@ -406,6 +559,115 @@ export function renderStatsHtml(stats: UsageStats): string {
       color: var(--brand-orange);
       text-decoration: underline;
     }
+
+    /* Mobile Responsive Rules */
+    @media (max-width: 640px) {
+      .container {
+        padding: 1rem 0.6rem;
+      }
+      header {
+        padding: 1.5rem 0.6rem 1.2rem;
+      }
+      header h1 {
+        font-size: 1.3rem;
+        line-height: 1.3;
+        word-break: break-word;
+      }
+      header p {
+        font-size: 0.88rem;
+      }
+      .privacy-banner {
+        padding: 0.9rem 0.85rem;
+        margin-bottom: 1.2rem;
+      }
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 1.2rem;
+      }
+      .kpi-card {
+        padding: 0.75rem 0.4rem;
+        min-width: 0;
+      }
+      .kpi-number {
+        font-size: 1.45rem;
+      }
+      .kpi-label {
+        font-size: 0.68rem;
+        letter-spacing: 0;
+      }
+      .kpi-sub {
+        font-size: 0.7rem;
+      }
+      .panel, .chart-panel {
+        padding: 1rem 0.6rem;
+      }
+      .sections-grid {
+        gap: 1.1rem;
+        margin-bottom: 1.2rem;
+      }
+      .chart-panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .bar-chart-container {
+        gap: 4px;
+      }
+      .chart-view-7d .bar-col {
+        min-width: 0;
+        flex: 1 1 0;
+      }
+      .bar-col {
+        min-width: 32px;
+      }
+      .bar-pillar {
+        max-width: 22px;
+      }
+      .bar-date-label {
+        font-size: 0.66rem;
+      }
+      .api-box {
+        padding: 1.1rem 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      /* Default to 7d view on mobile: fits 100% width cleanly */
+      .chart-view-7d {
+        display: flex;
+      }
+      .chart-view-14d {
+        display: none;
+      }
+      .btn-7d {
+        background: var(--brand-purple);
+        color: #ffffff;
+      }
+      .btn-14d {
+        background: transparent;
+        color: var(--brand-purple);
+      }
+    }
+    @media (min-width: 641px) {
+      /* Default to 14d view on desktop: full 2 weeks */
+      .chart-view-7d {
+        display: none;
+      }
+      .chart-view-14d {
+        display: flex;
+      }
+      .btn-7d {
+        background: transparent;
+        color: var(--brand-purple);
+      }
+      .btn-14d {
+        background: var(--brand-purple);
+        color: #ffffff;
+      }
+      .chart-scroll-hint {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -449,6 +711,34 @@ export function renderStatsHtml(stats: UsageStats): string {
       <div class="kpi-number">2012–2026</div>
       <div class="kpi-label">Archive Coverage</div>
       <div class="kpi-sub">15 years of search shifts</div>
+    </div>
+  </div>
+
+  <!-- Daily Activity Bar Chart -->
+  <div class="chart-panel">
+    <div class="chart-panel-header">
+      <div>
+        <h2>Daily Activity</h2>
+        <div class="chart-sub">Recent queries across Claude, Antigravity & AI agents</div>
+      </div>
+      <div class="chart-toggle-group">
+        <button type="button" id="btn-7d" class="chart-toggle-btn btn-7d" onclick="setDailyView('7d')">Last 7 Days</button>
+        <button type="button" id="btn-14d" class="chart-toggle-btn btn-14d" onclick="setDailyView('14d')">Last 14 Days</button>
+      </div>
+    </div>
+
+    <!-- 7-Day View (Default on mobile: fits 100% width with zero horizontal scrolling) -->
+    <div id="chart-7d" class="bar-chart-container chart-view-7d">
+      ${renderChartBars(last7Days, maxDaily7)}
+    </div>
+
+    <!-- 14-Day View (Default on desktop: full 2-week history) -->
+    <div id="chart-14d" class="bar-chart-container chart-view-14d">
+      ${renderChartBars(last14Days, maxDaily14)}
+    </div>
+
+    <div id="chart-hint" class="chart-scroll-hint" style="display: none;">
+      <span>&larr; Swipe left to explore earlier days</span>
     </div>
   </div>
 
@@ -504,26 +794,6 @@ export function renderStatsHtml(stats: UsageStats): string {
     </div>
   </div>
 
-  <!-- Daily Activity Bar Chart -->
-  <div class="chart-panel">
-    <h2>
-      <span>Daily Activity (Last 14 Days)</span>
-      <span style="font-size: 0.82rem; font-weight: 600; color: var(--brand-purple);">Rolling 14-Day Query Volume</span>
-    </h2>
-    <div class="bar-chart-container">
-      ${last14Days.map(item => {
-        const heightPct = Math.max(Math.round((item.count / maxDaily) * 100), 4);
-        return `
-        <div class="bar-col">
-          <span class="bar-count-label">${item.count > 0 ? item.count : ''}</span>
-          <div class="bar-pillar" style="height: ${heightPct}%;" title="${item.date}: ${item.count} queries"></div>
-          <span class="bar-date-label">${item.displayDate}</span>
-        </div>
-        `;
-      }).join('')}
-    </div>
-  </div>
-
   <!-- API Feed Link -->
   <div class="api-box">
     <div class="api-box-text">
@@ -537,16 +807,70 @@ export function renderStatsHtml(stats: UsageStats): string {
 
 <footer>
   <p style="margin-bottom: 0.75rem; font-weight: 700; color: var(--brand-deep-purple); font-size: 1.05rem;">Maintained by Marie Haynes Consulting Inc.</p>
-  <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 1.2rem; font-size: 0.95rem;">
+  <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 1.2rem; font-size: 0.95rem;">
     <a href="/">🏠 MCP Server Home</a>
     <a href="/api/stats" target="_blank">⚡ JSON Stats Feed</a>
     <a href="https://github.com/mariehaynes/algo-update-mcp" target="_blank" rel="noopener">⭐ GitHub Open Source</a>
     <a href="https://mariehaynes.com/newsletter" target="_blank" rel="noopener">📬 Marie's Newsletter</a>
     <a href="https://mariehaynes.com/contact" target="_blank" rel="noopener">✉️ Contact Marie</a>
   </div>
-  <p style="font-size: 0.82rem; opacity: 0.75;">Original Article & 15-Year Archive: <a href="https://www.mariehaynes.com/resources/algo-changes-and-more/" target="_blank">mariehaynes.com/resources/algo-changes-and-more/</a></p>
+  <p style="font-size: 0.82rem; opacity: 0.75; overflow-wrap: anywhere; word-break: break-all;">Original Article & 15-Year Archive: <a href="https://www.mariehaynes.com/resources/algo-changes-and-more/" target="_blank">mariehaynes.com/resources/algo-changes-and-more/</a></p>
 </footer>
+
+<script>
+  function setDailyView(view) {
+    var c7 = document.getElementById('chart-7d');
+    var c14 = document.getElementById('chart-14d');
+    var b7 = document.getElementById('btn-7d');
+    var b14 = document.getElementById('btn-14d');
+    var hint = document.getElementById('chart-hint');
+
+    if (view === '7d') {
+      if (c7) c7.style.setProperty('display', 'flex', 'important');
+      if (c14) c14.style.setProperty('display', 'none', 'important');
+      if (b7) {
+        b7.style.setProperty('background', 'var(--brand-purple)', 'important');
+        b7.style.setProperty('color', '#ffffff', 'important');
+      }
+      if (b14) {
+        b14.style.setProperty('background', 'transparent', 'important');
+        b14.style.setProperty('color', 'var(--brand-purple)', 'important');
+      }
+      if (hint) hint.style.setProperty('display', 'none', 'important');
+    } else {
+      if (c7) c7.style.setProperty('display', 'none', 'important');
+      if (c14) {
+        c14.style.setProperty('display', 'flex', 'important');
+        c14.scrollLeft = c14.scrollWidth;
+      }
+      if (b7) {
+        b7.style.setProperty('background', 'transparent', 'important');
+        b7.style.setProperty('color', 'var(--brand-purple)', 'important');
+      }
+      if (b14) {
+        b14.style.setProperty('background', 'var(--brand-purple)', 'important');
+        b14.style.setProperty('color', '#ffffff', 'important');
+      }
+      if (hint) {
+        if (window.innerWidth <= 640) {
+          hint.style.setProperty('display', 'flex', 'important');
+        } else {
+          hint.style.setProperty('display', 'none', 'important');
+        }
+      }
+    }
+  }
+
+  // Auto-scroll 14-day container to far right on load so latest activity is centered
+  window.addEventListener('DOMContentLoaded', function() {
+    var c14 = document.getElementById('chart-14d');
+    if (c14) {
+      c14.scrollLeft = c14.scrollWidth;
+    }
+  });
+</script>
 
 </body>
 </html>`;
 }
+

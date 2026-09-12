@@ -83,6 +83,23 @@
     "source": "Marie Haynes Consulting"
   },
   {
+    "id": "2026-08-25-ahrefs-facing-accuracy-glitches-in-organic-traffic-reporting",
+    "title": "Ahrefs Facing Accuracy Glitches in Organic Traffic Reporting",
+    "date": "2026-08-25",
+    "year": 2026,
+    "category": "Other",
+    "platform": "Google Search",
+    "status": "Confirmed",
+    "summary": "Ahrefs appears to be having some accuracy issues with its traffic estimates. They are often off in terms of the absolute numbers, but for some sites their new way of reporting on organic traffic is way off. Some sites have huge increases that aren't real. A number of sites (especially recipe sites) have declines that aren't real. Apparently Ahrefs is on it.",
+    "html": "<strong>2026-08-25</strong>: <strong>Ahrefs Facing Accuracy Glitches in Organic Traffic Reporting</strong>. Ahrefs appears to be having some accuracy issues with its traffic estimates. They are often off in terms of the absolute numbers, but for some sites their new way of reporting on organic traffic is way off. Some sites have huge increases that aren't real. A number of sites (especially recipe sites) have declines that aren't real. Apparently Ahrefs is on it.",
+    "sources": [
+      "https://community.mariehaynes.com/posts/107236524",
+      "https://x.com/lilyraynyc/status/2098419703723032923?s=20",
+      "https://x.com/Marie_Haynes/status/2098392049464533084?s=20"
+    ],
+    "originalUrl": "https://www.mariehaynes.com/resources/algo-changes-and-more/#2026-08-25-ahrefs-facing-accuracy-glitches-in-organic-traffic-reporting"
+  },
+  {
     "id": "2026-08-19-google-search-console-adds-direct-controls-for-generative-ai-visibili",
     "title": "Google Search Console Adds Direct Controls for Generative AI Visibility",
     "date": "2026-08-19",
