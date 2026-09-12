@@ -67,17 +67,16 @@ export function renderStatsHtml(stats: UsageStats): string {
 
   function renderChartBars(days: typeof last14Days, maxVal: number) {
     return days.map(item => {
-      const heightPct = item.count > 0 ? Math.max(Math.round((item.count / maxVal) * 100), 8) : 0;
+      const heightPct = item.count > 0 ? Math.max(Math.round((item.count / maxVal) * 80), 7) : 0;
       return `
       <div class="bar-col ${item.isToday ? 'is-today' : ''}">
         <div class="bar-track">
-          <span class="bar-count-label ${item.count > 0 ? 'has-count' : ''}">${item.count > 0 ? item.count.toLocaleString() : '&nbsp;'}</span>
-          <div class="bar-pillar-wrap">
-            ${item.count > 0 
-              ? `<div class="bar-pillar" style="height: ${heightPct}%;" title="${item.date}: ${item.count} queries"></div>` 
-              : `<div class="bar-pillar-zero" title="${item.date}: 0 queries"></div>`
-            }
-          </div>
+          ${item.count > 0 
+            ? `<div class="bar-pillar" style="height: ${heightPct}%;" title="${item.date}: ${item.count} queries">
+                <span class="bar-count-label">${item.count.toLocaleString()}</span>
+               </div>` 
+            : `<div class="bar-pillar-zero" title="${item.date}: 0 queries"></div>`
+          }
         </div>
         <div class="bar-date-row">
           <span class="bar-date-label ${item.isToday ? 'today-badge' : ''}" title="${item.date}">${item.isToday ? 'Today' : item.displayDate}</span>
@@ -396,9 +395,9 @@ export function renderStatsHtml(stats: UsageStats): string {
     }
     .bar-chart-container {
       display: flex;
-      align-items: flex-end;
+      align-items: stretch;
       gap: 8px;
-      padding: 0.5rem 0 0;
+      padding: 1.5rem 0 0;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: thin;
@@ -428,56 +427,51 @@ export function renderStatsHtml(stats: UsageStats): string {
       width: 100%;
       height: 140px;
       display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      align-items: center;
-      border-bottom: 2px solid #ede7f4;
-      padding-bottom: 0;
-    }
-    .bar-count-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--brand-deep-purple);
-      margin-bottom: 4px;
-      min-height: 14px;
-      line-height: 1;
-      font-family: monospace;
-      text-align: center;
-      display: block;
-      width: 100%;
-    }
-    .bar-count-label:not(.has-count) {
-      visibility: hidden;
-    }
-    .bar-pillar-wrap {
-      width: 100%;
-      height: 112px;
-      display: flex;
       align-items: flex-end;
       justify-content: center;
+      border-bottom: 2px solid #ede7f4;
+      position: relative;
     }
     .bar-pillar {
       width: 100%;
-      max-width: 32px;
+      max-width: 28px;
       background: linear-gradient(180deg, var(--brand-orange), var(--brand-purple));
       border-radius: 4px 4px 0 0;
       min-height: 8px;
+      position: relative;
       transition: height 0.3s ease;
       cursor: pointer;
     }
     .bar-pillar:hover {
       filter: brightness(1.1);
     }
+    .bar-count-label {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--brand-deep-purple);
+      font-family: monospace;
+      white-space: nowrap;
+      line-height: 1;
+      pointer-events: none;
+    }
     .bar-pillar-zero {
       width: 14px;
       height: 3px;
       background: #e5dde9;
       border-radius: 2px;
+      margin-bottom: -1px;
     }
     .bar-date-row {
       width: 100%;
-      padding-top: 8px;
-      text-align: center;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .bar-date-label {
       font-size: 0.72rem;
@@ -485,15 +479,15 @@ export function renderStatsHtml(stats: UsageStats): string {
       white-space: nowrap;
       display: block;
       text-align: center;
+      line-height: 1;
     }
     .bar-date-label.today-badge {
       background: #eee6f6;
       color: var(--brand-purple);
       font-weight: 700;
-      padding: 1px 3px;
+      padding: 3px 6px;
       border-radius: 4px;
       font-size: 0.68rem;
-      display: inline-block;
     }
     .chart-scroll-hint {
       display: flex;
@@ -613,6 +607,7 @@ export function renderStatsHtml(stats: UsageStats): string {
       }
       .bar-chart-container {
         gap: 4px;
+        padding-top: 1.3rem;
       }
       .chart-view-7d .bar-col {
         min-width: 0;
@@ -621,11 +616,25 @@ export function renderStatsHtml(stats: UsageStats): string {
       .bar-col {
         min-width: 32px;
       }
+      .bar-track {
+        height: 130px;
+      }
       .bar-pillar {
         max-width: 22px;
       }
+      .bar-count-label {
+        font-size: 0.68rem;
+        margin-bottom: 3px;
+      }
+      .bar-date-row {
+        height: 28px;
+      }
       .bar-date-label {
         font-size: 0.66rem;
+      }
+      .bar-date-label.today-badge {
+        padding: 2px 5px;
+        font-size: 0.65rem;
       }
       .api-box {
         padding: 1.1rem 1rem;
