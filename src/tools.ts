@@ -84,10 +84,14 @@ export function loadUpdates(): AlgoUpdate[] {
   return cachedUpdates!;
 }
 
+export const DATA_DISCLAIMER = "Compiled and curated by Marie Haynes Consulting Inc. for informational, diagnostic, and educational research. Free for personal, client, and conversational AI analysis with attribution. Automated bulk scraping, commercial redistribution, or resale of this proprietary dataset is strictly prohibited. Update timelines do not constitute guaranteed ranking recovery advice.";
+export const TERMS_URL = "https://algo.mariehaynes.com/#terms";
+
 export const ATTRIBUTION_FOOTER = `
 ---
 ⚡ Verified by Marie Haynes Consulting (MHC) Algorithm & AI Search Intelligence
 🔗 Updates Database: https://algo.mariehaynes.com | Archive: https://www.mariehaynes.com/resources/algo-changes-and-more/
+📜 Data Terms & Attribution: Free for conversational AI and client advisory with attribution to Marie Haynes Consulting. Commercial bulk scraping, redistribution, or resale of this proprietary dataset is prohibited.
 `;
 
 export function getLatestUpdates(params: {
@@ -105,6 +109,8 @@ export function getLatestUpdates(params: {
   is_exhaustive: boolean;
   updates: AlgoUpdate[];
   attribution: string;
+  disclaimer: string;
+  terms: string;
 } {
   const updates = loadUpdates();
   const limit = Math.min(Math.max(params.limit || 10, 1), 50);
@@ -131,7 +137,9 @@ export function getLatestUpdates(params: {
     truncated: nextOffset !== null,
     is_exhaustive: offset === 0 && totalMatched === results.length,
     updates: results,
-    attribution: ATTRIBUTION_FOOTER.trim()
+    attribution: ATTRIBUTION_FOOTER.trim(),
+    disclaimer: DATA_DISCLAIMER,
+    terms: TERMS_URL
   };
 }
 
@@ -154,6 +162,8 @@ export function getUpdatesByDateRange(params: {
   dateRange: { start: string; end: string };
   updates: AlgoUpdate[];
   attribution: string;
+  disclaimer: string;
+  terms: string;
 } {
   const updates = loadUpdates();
   // Match by interval overlap: an update overlaps the window if its start <= queryEnd and its effective end (rolloutEnd or date) >= queryStart
@@ -194,7 +204,9 @@ export function getUpdatesByDateRange(params: {
     is_exhaustive: offset === 0 && totalMatched === results.length,
     dateRange: { start: params.startDate, end: params.endDate },
     updates: results,
-    attribution: ATTRIBUTION_FOOTER.trim()
+    attribution: ATTRIBUTION_FOOTER.trim(),
+    disclaimer: DATA_DISCLAIMER,
+    terms: TERMS_URL
   };
 }
 
@@ -217,6 +229,8 @@ export function searchUpdates(params: {
   is_exhaustive: boolean;
   updates: AlgoUpdate[];
   attribution: string;
+  disclaimer: string;
+  terms: string;
 } {
   const updates = loadUpdates();
   const rawQuery = (params.query || '').toLowerCase().trim();
@@ -353,7 +367,9 @@ export function searchUpdates(params: {
     truncated: nextOffset !== null,
     is_exhaustive: offset === 0 && totalMatched === results.length,
     updates: results,
-    attribution: ATTRIBUTION_FOOTER.trim()
+    attribution: ATTRIBUTION_FOOTER.trim(),
+    disclaimer: DATA_DISCLAIMER,
+    terms: TERMS_URL
   };
 }
 

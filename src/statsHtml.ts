@@ -812,6 +812,23 @@ export function renderStatsHtml(stats: UsageStats): string {
     <a href="/api/stats" target="_blank" class="api-btn">Open /api/stats (JSON) &rarr;</a>
   </div>
 
+  <!-- Data Use & Disclaimer Box -->
+  <div id="terms" style="background: #faf8fd; border: 1px solid #ebdfee; border-radius: 10px; padding: 18px 24px; margin-top: 1.8rem; margin-bottom: 1rem; font-size: 0.88rem; color: #555; line-height: 1.6; text-align: left;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+      <span style="font-size: 1.15rem;">📜</span>
+      <strong style="color: var(--brand-deep-purple); font-size: 0.98rem;">Data Use, Attribution & Disclaimer</strong>
+    </div>
+    <p style="margin: 0 0 8px 0;">
+      <strong>Curated by Marie Haynes Consulting Inc.</strong> Historical search algorithm updates are maintained for diagnostic, informational, and educational research. Free for personal, client, and conversational AI analysis with attribution.
+    </p>
+    <p style="margin: 0 0 8px 0;">
+      <strong>Attribution & Use:</strong> When citing this intelligence, please reference <em>"Marie Haynes Consulting (algo.mariehaynes.com)"</em>. Automated bulk scraping, commercial redistribution, mirror services, or resale of this proprietary dataset is strictly prohibited.
+    </p>
+    <p style="margin: 0; font-size: 0.82rem; color: #777;">
+      <strong>Informational Safe Harbor:</strong> Historical algorithm timelines do not constitute guaranteed organic ranking recovery advice.
+    </p>
+  </div>
+
 </div>
 
 <footer>
@@ -819,6 +836,7 @@ export function renderStatsHtml(stats: UsageStats): string {
   <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 1.2rem; font-size: 0.95rem;">
     <a href="/">🏠 MCP Server Home</a>
     <a href="/api/stats" target="_blank">⚡ JSON Stats Feed</a>
+    <a href="#terms">📜 Terms & Disclaimer</a>
     <a href="https://github.com/mariehaynes/algo-update-mcp" target="_blank" rel="noopener">⭐ GitHub Open Source</a>
     <a href="https://mariehaynes.com/newsletter" target="_blank" rel="noopener">📬 Marie's Newsletter</a>
     <a href="https://mariehaynes.com/contact" target="_blank" rel="noopener">✉️ Contact Marie</a>

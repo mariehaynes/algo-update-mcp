@@ -203,5 +203,15 @@ The MCP server automatically injects formatting instructions into tool definitio
 
 ---
 
+## Data Use, Attribution & Legal Disclaimer
+
+- **Open Source Code vs. Proprietary Dataset**: The code and server architecture in this repository are licensed under the [MIT License](LICENSE). However, Marie Haynes' comprehensive 15-year Google algorithm update archive (hosted on `algo.mariehaynes.com` and `mariehaynes.com`) is a proprietary dataset compiled, researched, and curated by Marie Haynes Consulting Inc.
+- **Permitted Use**: You are free to query the live hosted MCP server and REST endpoints for personal research, client advisory, diagnostic work, and conversational AI analysis with proper attribution.
+- **Attribution Required**: When presenting, citing, or publishing analysis or reports powered by this server, please attribute the source as *"Marie Haynes Consulting (algo.mariehaynes.com)"*.
+- **Restrictions**: Automated bulk scraping, commercial redistribution, mirror APIs, or resale of this proprietary dataset is strictly prohibited without prior written permission.
+- **Informational Safe Harbor**: Historical update timelines, rollout periods, and search volatility records are provided for educational and diagnostic investigation, and do not constitute guaranteed organic ranking recovery advice.
+
+---
+
 ## License
 MIT License. See [LICENSE](LICENSE) for details.

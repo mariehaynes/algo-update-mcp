@@ -11,7 +11,9 @@ import {
   getUpdatesByDateRange,
   searchUpdates,
   getAllCategories,
-  ATTRIBUTION_FOOTER
+  ATTRIBUTION_FOOTER,
+  DATA_DISCLAIMER,
+  TERMS_URL
 } from './tools.js';
 import { MHC_LOGO_BASE64 } from './logoData.js';
 import { recordToolUsage, getUsageStats, initTelemetry, TransportType } from './telemetry.js';
@@ -140,7 +142,12 @@ function createMcpServer(transport: TransportType = 'streamable_http'): McpServe
       return {
         content: [{
           type: "text",
-          text: JSON.stringify({ ...result, attribution: ATTRIBUTION_FOOTER.trim() }, null, 2)
+          text: JSON.stringify({
+            ...result,
+            attribution: ATTRIBUTION_FOOTER.trim(),
+            disclaimer: DATA_DISCLAIMER,
+            terms: TERMS_URL
+          }, null, 2)
         }]
       };
     }
@@ -448,7 +455,11 @@ app.get('/updates.json', (req, res) => {
 // ----------------------------------------------------
 app.get('/api/stats', async (req, res) => {
   await initTelemetry();
-  res.json(getUsageStats());
+  res.json({
+    ...getUsageStats(),
+    disclaimer: DATA_DISCLAIMER,
+    terms: TERMS_URL
+  });
 });
 
 app.get('/stats', async (req, res) => {
@@ -1579,6 +1590,21 @@ Please merge the new "marie-haynes-algo" server into my file. Ensure all JSON br
         </details>
       </div>
     </div>
+  <!-- Data Use, Attribution & Disclaimer -->
+  <div id="terms" style="background: #faf8fd; border: 1px solid #ebdfee; border-radius: 10px; padding: 18px 24px; margin: 2.5rem 0 1.5rem 0; font-size: 0.88rem; color: #555; line-height: 1.6; text-align: left;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+      <span style="font-size: 1.15rem;">📜</span>
+      <strong style="color: var(--brand-deep-purple); font-size: 0.98rem;">Data Use, Attribution & Disclaimer</strong>
+    </div>
+    <p style="margin: 0 0 8px 0;">
+      <strong>Compiled and curated by Marie Haynes Consulting Inc.</strong> for informational, diagnostic, and educational research. Free for personal, client, and conversational AI analysis with attribution.
+    </p>
+    <p style="margin: 0 0 8px 0;">
+      <strong>Attribution & Use:</strong> When sharing or displaying insights powered by this server, please cite <em>"Marie Haynes Consulting (algo.mariehaynes.com)"</em>. Automated bulk scraping, commercial redistribution, mirror services, or resale of this proprietary 15-year dataset is strictly prohibited without prior written permission.
+    </p>
+    <p style="margin: 0; font-size: 0.82rem; color: #777;">
+      <strong>Informational Safe Harbor:</strong> Historical algorithm timelines, rollout dates, and search volatility records are provided for investigative reference and do not constitute guaranteed organic ranking recovery advice.
+    </p>
   </div>
 
 </div>
@@ -1588,6 +1614,7 @@ Please merge the new "marie-haynes-algo" server into my file. Ensure all JSON br
   <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 1.2rem; font-size: 0.95rem;">
     <a href="/stats">📊 Usage Dashboard</a>
     <a href="/api/stats" target="_blank">⚡ JSON Stats Feed</a>
+    <a href="#terms">📜 Terms & Disclaimer</a>
     <a href="https://github.com/mariehaynes/algo-update-mcp" target="_blank" rel="noopener">⭐ GitHub Open Source</a>
     <a href="https://mariehaynes.com/newsletter" target="_blank" rel="noopener">📬 Marie's Newsletter</a>
     <a href="https://mariehaynes.com/join" target="_blank" rel="noopener">💬 Join Marie's AI & Search Community</a>
