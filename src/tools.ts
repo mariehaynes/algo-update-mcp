@@ -60,6 +60,27 @@ const DATA_PATHS = [
 
 let cachedUpdates: AlgoUpdate[] | null = null;
 
+export function cleanSourceUrl(raw: string): string {
+  if (!raw || typeof raw !== 'string') return '';
+  let url = raw.trim();
+  if (url.includes('](')) {
+    const parts = url.split('](');
+    const dest = parts[parts.length - 1].replace(/^[\(]+/, '').replace(/[\)]+$/, '').trim();
+    if (dest.startsWith('http')) {
+      url = dest;
+    } else {
+      url = parts[0];
+    }
+  }
+  const fullMdMatch = url.match(/\[(?:[^\]]*)\]\((https?:\/\/[^\s\)\"\'<>]+)\)/i);
+  if (fullMdMatch) {
+    url = fullMdMatch[1];
+  }
+  url = url.replace(/^[\[\(]+/, '');
+  url = url.replace(/[.,;:\]\)\>\"\'\s]+$/, '').trim();
+  return url;
+}
+
 export function loadUpdates(): AlgoUpdate[] {
   if (!cachedUpdates) {
     let loaded = false;
@@ -67,7 +88,13 @@ export function loadUpdates(): AlgoUpdate[] {
       if (fs.existsSync(p)) {
         try {
           const raw = fs.readFileSync(p, 'utf-8');
-          cachedUpdates = JSON.parse(raw);
+          const parsed: AlgoUpdate[] = JSON.parse(raw);
+          cachedUpdates = parsed.map(u => ({
+            ...u,
+            source: u.source || 'Marie Haynes Consulting',
+            sources: Array.from(new Set((u.sources || []).map(cleanSourceUrl).filter(s => s && s.startsWith('http')))),
+            originalUrl: cleanSourceUrl(u.originalUrl || '')
+          }));
           console.log(`✅ Loaded ${cachedUpdates?.length} updates from: ${p}`);
           loaded = true;
           break;
