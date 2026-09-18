@@ -1480,10 +1480,13 @@ Please merge the new "marie-haynes-algo" server into my file. Ensure all JSON br
 
   <!-- Spotlight Recent Updates -->
   <div id="spotlightSection">
-    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:1rem; flex-wrap:wrap;">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.4rem; flex-wrap:wrap; gap:8px;">
       <h2>⚡ Live Feed Spotlight</h2>
       <span style="font-size:0.88rem; color:#777;">Most recent entries delivered by this server</span>
     </div>
+    <p style="margin-top:0; margin-bottom:1.2rem; font-size:0.95rem; color:#555; line-height:1.5;">
+      Explore the full interactive timeline, category filters, and 15-year history on my <a href="https://www.mariehaynes.com/resources/algo-changes-and-more/" target="_blank" rel="noopener" style="color: var(--brand-purple); font-weight: 600; text-decoration: underline;">main Google Algorithm Updates page ↗</a>
+    </p>
     <div id="spotlightCards">
       ${spotlightUpdates.map(u => {
         const link = u.originalUrl || (u.sources && u.sources[0]) || '#';
