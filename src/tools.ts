@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { Firestore } from '@google-cloud/firestore';
 
 export interface AlgoUpdate {
   id: string;
@@ -58,7 +59,33 @@ const DATA_PATHS = [
   path.join(__dirname, '../src/data/algo-updates.json'),
 ];
 
+let firestoreDb: Firestore | null = null;
+try {
+  const firestoreOpts: any = {
+    projectId: process.env.GOOGLE_CLOUD_PROJECT || 'mhc-news-portal'
+  };
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    try {
+      let keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+      if (keyString.startsWith("'") && keyString.endsWith("'")) {
+        keyString = keyString.slice(1, -1);
+      }
+      const sa = JSON.parse(keyString);
+      firestoreOpts.credentials = {
+        client_email: sa.client_email,
+        private_key: sa.private_key
+      };
+    } catch (e) {}
+  }
+  firestoreDb = new Firestore(firestoreOpts);
+} catch (err) {
+  console.warn('[Tools] Firestore client initialization skipped:', err);
+}
+
 let cachedUpdates: AlgoUpdate[] | null = null;
+let lastFirestoreSyncTime = 0;
+const FIRESTORE_SYNC_TTL_MS = 60000; // 60 seconds TTL
+let isSyncingFirestore = false;
 
 export function cleanSourceUrl(raw: string): string {
   if (!raw || typeof raw !== 'string') return '';
@@ -81,34 +108,127 @@ export function cleanSourceUrl(raw: string): string {
   return url;
 }
 
-export function loadUpdates(): AlgoUpdate[] {
-  if (!cachedUpdates) {
-    let loaded = false;
-    for (const p of DATA_PATHS) {
-      if (fs.existsSync(p)) {
-        try {
-          const raw = fs.readFileSync(p, 'utf-8');
-          const parsed: AlgoUpdate[] = JSON.parse(raw);
-          cachedUpdates = parsed.map(u => ({
-            ...u,
-            source: u.source || 'Marie Haynes Consulting',
-            sources: Array.from(new Set((u.sources || []).map(cleanSourceUrl).filter(s => s && s.startsWith('http')))),
-            originalUrl: cleanSourceUrl(u.originalUrl || '')
-          }));
-          console.log(`✅ Loaded ${cachedUpdates?.length} updates from: ${p}`);
-          loaded = true;
-          break;
-        } catch (e) {
-          console.error(`Error reading ${p}:`, e);
-        }
+export function loadBaseUpdatesFromDisk(): AlgoUpdate[] {
+  for (const p of DATA_PATHS) {
+    if (fs.existsSync(p)) {
+      try {
+        const raw = fs.readFileSync(p, 'utf-8');
+        const parsed: AlgoUpdate[] = JSON.parse(raw);
+        const mapped = parsed.map(u => ({
+          ...u,
+          source: u.source || 'Marie Haynes Consulting',
+          sources: Array.from(new Set((u.sources || []).map(cleanSourceUrl).filter(s => s && s.startsWith('http')))),
+          originalUrl: cleanSourceUrl(u.originalUrl || '')
+        }));
+        console.log(`✅ Loaded ${mapped.length} updates from: ${p}`);
+        return mapped;
+      } catch (e) {
+        console.error(`Error reading ${p}:`, e);
       }
     }
-    if (!loaded) {
-      console.warn('⚠️ Could not find algo-updates.json in any of the search paths:', DATA_PATHS);
-      cachedUpdates = [];
-    }
   }
-  return cachedUpdates!;
+  console.warn('⚠️ Could not find algo-updates.json in any of the search paths:', DATA_PATHS);
+  return [];
+}
+
+export function mergeFirestoreUpdates(recentUpdates: any[]): void {
+  if (!cachedUpdates) {
+    cachedUpdates = loadBaseUpdatesFromDisk();
+  }
+  if (!recentUpdates || !Array.isArray(recentUpdates) || recentUpdates.length === 0) {
+    return;
+  }
+
+  const map = new Map<string, AlgoUpdate>();
+  for (const u of cachedUpdates) {
+    map.set(u.id, u);
+  }
+
+  for (const item of recentUpdates) {
+    if (!item || !item.id) continue;
+    const cleanU: AlgoUpdate = {
+      id: item.id,
+      title: item.title,
+      date: item.date,
+      year: item.year || (item.date ? parseInt(item.date.split('-')[0], 10) : 2026),
+      category: item.category || 'Search Algorithm Update',
+      platform: item.platform || 'Google Search',
+      status: item.status || 'Confirmed',
+      summary: item.summary || '',
+      html: item.html || `<strong>${item.date}</strong>: <strong>${item.title}</strong>. ${item.summary || ''}`,
+      sources: Array.from(new Set((item.sources || []).map(cleanSourceUrl).filter((s: string) => s && s.startsWith('http')))),
+      originalUrl: cleanSourceUrl(item.originalUrl || `https://www.mariehaynes.com/resources/algo-changes-and-more/#${item.id}`),
+      source: item.source || 'Marie Haynes Consulting',
+      rolloutEnd: item.rolloutEnd
+    };
+    map.set(item.id, cleanU);
+  }
+
+  const combined = Array.from(map.values());
+  combined.sort((a, b) => {
+    const diff = new Date(b.date).getTime() - new Date(a.date).getTime();
+    if (diff !== 0) return diff;
+    return (b.id || '').localeCompare(a.id || '');
+  });
+
+  cachedUpdates = combined;
+  lastFirestoreSyncTime = Date.now();
+}
+
+export async function syncUpdatesFromFirestore(): Promise<boolean> {
+  if (!firestoreDb) return false;
+  if (isSyncingFirestore) return false;
+  isSyncingFirestore = true;
+  try {
+    const docRef = firestoreDb.collection('system').doc('algo_recent_updates');
+    const snap = await docRef.get();
+    if (snap.exists) {
+      const data = snap.data();
+      if (data && Array.isArray(data.updates)) {
+        mergeFirestoreUpdates(data.updates);
+        return true;
+      }
+    }
+  } catch (err: any) {
+    if (process.env.NODE_ENV !== 'test') {
+      console.warn('[Tools] Dynamic Firestore sync skipped/failed:', err.message || err);
+    }
+  } finally {
+    isSyncingFirestore = false;
+  }
+  return false;
+}
+
+export async function refreshUpdatesCache(): Promise<{ count: number; synced: boolean }> {
+  const synced = await syncUpdatesFromFirestore();
+  const updates = loadUpdates();
+  return { count: updates.length, synced };
+}
+
+let periodicSyncTimer: NodeJS.Timeout | null = null;
+export function startPeriodicSync(intervalMs: number = 60000): void {
+  if (periodicSyncTimer) return;
+  syncUpdatesFromFirestore().catch(() => {});
+  periodicSyncTimer = setInterval(() => {
+    syncUpdatesFromFirestore().catch(() => {});
+  }, intervalMs);
+  if (periodicSyncTimer && typeof periodicSyncTimer.unref === 'function') {
+    periodicSyncTimer.unref();
+  }
+}
+
+export function loadUpdates(): AlgoUpdate[] {
+  if (!cachedUpdates) {
+    cachedUpdates = loadBaseUpdatesFromDisk();
+    // Trigger background sync if not yet run
+    if (Date.now() - lastFirestoreSyncTime > FIRESTORE_SYNC_TTL_MS) {
+      syncUpdatesFromFirestore().catch(() => {});
+    }
+  } else if (Date.now() - lastFirestoreSyncTime > FIRESTORE_SYNC_TTL_MS) {
+    // Refresh in background if TTL expired
+    syncUpdatesFromFirestore().catch(() => {});
+  }
+  return cachedUpdates;
 }
 
 export const DATA_DISCLAIMER = "Compiled and curated by Marie Haynes Consulting Inc. for informational, diagnostic, and educational research. Free for personal, client, and conversational AI analysis with attribution. Automated bulk scraping, commercial redistribution, or resale of this proprietary dataset is strictly prohibited. Update timelines do not constitute guaranteed ranking recovery advice.";

@@ -71,9 +71,11 @@ The system is designed as a standalone, stateless Node.js / TypeScript microserv
 
 ### Key Components:
 - **Sample OKF Dataset (`sample-okf/`)**: Human-readable Markdown files with YAML frontmatter demonstrating the Open Knowledge Format structure.
-- **Lookup Index (`src/data/algo-updates.json`)**: An in-memory JSON dataset of sample updates used for fast local development and automated testing.
+- **Lookup Index (`src/data/algo-updates.json` & `full-archive.json`)**: An in-memory JSON dataset used for baseline historical lookups and fast local development.
+- **Real-Time Dynamic Sync Layer (`src/tools.ts`)**: Automatically polls and overlays updates from Cloud Firestore (`system/algo_recent_updates`) with a 60-second TTL cache, allowing newly curated entries from `okf-news-system` to go live immediately without rebuilding the container.
 - **MCP Server Engine (`src/server.ts` & `src/tools.ts`)**: Built on `@modelcontextprotocol/sdk` and Express. It registers standardized MCP tools with Zod schema validation and embeds formatting rules in every response.
-- **Anonymous Telemetry (`src/telemetry.ts` & `src/statsHtml.ts`)**: Collects aggregate counters in memory and optionally persists them to Firestore (`system/algo_mcp_stats`) with a local JSON fallback (`data/usage-stats.json`). Includes an optional server-side GA4 Measurement Protocol dispatcher (`mcp_tool_usage`).
+- **Interactive Web Portal & Live Spotlight (`/`)**: Branded dashboard with clickable update cards, auto-hydrating client-side script, and instant cache-refresh webhook (`/api/refresh`).
+- **Anonymous Telemetry (`src/telemetry.ts` & `src/statsHtml.ts`)**: Collects aggregate counters in memory and persists them to Firestore (`system/algo_mcp_stats`) with a local JSON fallback (`data/usage-stats.json`). Includes an optional server-side GA4 Measurement Protocol dispatcher (`mcp_tool_usage`).
 - **Containerization (`Dockerfile`)**: Multi-stage build producing an optimized production container ready for stateless, autoscaling deployment on Google Cloud Run.
 
 ---

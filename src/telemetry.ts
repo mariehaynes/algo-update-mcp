@@ -40,9 +40,23 @@ const STATS_FILE_PATH = path.join(process.cwd(), 'data/usage-stats.json');
 // Initialize Firestore client
 let firestoreDb: Firestore | null = null;
 try {
-  firestoreDb = new Firestore({
+  const firestoreOpts: any = {
     projectId: process.env.GOOGLE_CLOUD_PROJECT || 'mhc-news-portal'
-  });
+  };
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    try {
+      let keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+      if (keyString.startsWith("'") && keyString.endsWith("'")) {
+        keyString = keyString.slice(1, -1);
+      }
+      const sa = JSON.parse(keyString);
+      firestoreOpts.credentials = {
+        client_email: sa.client_email,
+        private_key: sa.private_key
+      };
+    } catch (e) {}
+  }
+  firestoreDb = new Firestore(firestoreOpts);
 } catch (err) {
   console.warn('[Telemetry] Firestore client not initialized, using local fallback:', err);
 }

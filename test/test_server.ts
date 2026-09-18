@@ -67,7 +67,13 @@ const server = app.listen(TEST_PORT, '127.0.0.1', async () => {
     assert.ok(statsHtml.includes('Zero-Knowledge Guarantee'), 'Must contain Privacy guarantee');
     assert.ok(statsHtml.includes('Tool Popularity'), 'Must contain Tool Popularity panel');
     assert.ok(statsHtml.includes('G-2N5XDDYHFL'), 'Must include GA4 measurement tag');
-    console.log('✅ Endpoint GET /stats (Dashboard HTML) passed');
+    // 7. Test /api/refresh endpoint
+    const refreshResStr = await get(`http://127.0.0.1:${TEST_PORT}/api/refresh`);
+    const refreshRes = JSON.parse(refreshResStr);
+    assert.strictEqual(refreshRes.success, true, 'Refresh must succeed');
+    assert.ok(typeof refreshRes.totalUpdates === 'number', 'totalUpdates must be a number');
+    assert.ok(refreshRes.totalUpdates > 0, 'totalUpdates must be greater than 0');
+    console.log(`✅ Endpoint GET /api/refresh passed (totalUpdates: ${refreshRes.totalUpdates})`);
 
     console.log('\n🎉 ALL HTTP, STATS & WEBMCP ENDPOINT TESTS PASSED!');
     server.close();

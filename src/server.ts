@@ -11,6 +11,8 @@ import {
   getUpdatesByDateRange,
   searchUpdates,
   getAllCategories,
+  refreshUpdatesCache,
+  startPeriodicSync,
   ATTRIBUTION_FOOTER,
   DATA_DISCLAIMER,
   TERMS_URL
@@ -405,6 +407,7 @@ app.get('/.well-known/mcp.json', (req, res) => {
 // Public REST API & JSON Feeds
 // ----------------------------------------------------
 app.get('/api/updates', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=60, s-maxage=60');
   recordToolUsage('api_updates', 'api');
   const { limit, offset, minRelevance, sortOrder, platform, category, startDate, endDate, query, sortBy, includeHtml } = req.query;
   const wantHtml = includeHtml === 'true' || includeHtml === '1';
@@ -445,9 +448,26 @@ app.get('/api/updates', (req, res) => {
 });
 
 app.get('/updates.json', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=60, s-maxage=60');
   recordToolUsage('api_updates', 'api');
   const updates = loadUpdates();
   res.json(updates);
+});
+
+app.all('/api/refresh', async (req, res) => {
+  try {
+    const result = await refreshUpdatesCache();
+    const updates = loadUpdates();
+    res.json({
+      success: true,
+      synced: result.synced,
+      totalUpdates: updates.length,
+      latest: updates.slice(0, 3).map(u => ({ id: u.id, date: u.date, title: u.title })),
+      timestamp: new Date().toISOString()
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // ----------------------------------------------------
@@ -554,6 +574,7 @@ app.get('/logo.jpg', (req, res) => {
 // Branded Web Landing Page & Explorer (Poppins & Noto Sans)
 // ----------------------------------------------------
 app.get('/', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=60, s-maxage=60');
   const updates = loadUpdates();
   const spotlightUpdates = updates.slice(0, 3);
   const stats = getUsageStats();
@@ -1458,21 +1479,28 @@ Please merge the new "marie-haynes-algo" server into my file. Ensure all JSON br
   </div>
 
   <!-- Spotlight Recent Updates -->
-  <div>
+  <div id="spotlightSection">
     <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:1rem; flex-wrap:wrap;">
       <h2>⚡ Live Feed Spotlight</h2>
       <span style="font-size:0.88rem; color:#777;">Most recent entries delivered by this server</span>
     </div>
-    ${spotlightUpdates.map(u => `
-      <div class="spotlight-card">
-        <div class="spotlight-header">
-          <span class="spotlight-date">${u.date}</span>
-          <span class="spotlight-badge">${u.category}</span>
+    <div id="spotlightCards">
+      ${spotlightUpdates.map(u => {
+        const link = u.originalUrl || (u.sources && u.sources[0]) || '#';
+        return `
+        <div class="spotlight-card">
+          <div class="spotlight-header">
+            <span class="spotlight-date">${u.date}</span>
+            <span class="spotlight-badge">${u.category}</span>
+          </div>
+          <h3 class="spotlight-title">
+            <a href="${link}" target="_blank" rel="noopener noreferrer" style="color:#1e1b24; text-decoration:none;">${u.title}</a>
+          </h3>
+          <p class="spotlight-summary">${u.summary}</p>
         </div>
-        <h3 class="spotlight-title">${u.title}</h3>
-        <p class="spotlight-summary">${u.summary}</p>
-      </div>
-    `).join('')}
+        `;
+      }).join('')}
+    </div>
   </div>
 
   <!-- Frequently Asked Questions (FAQ) Section -->
@@ -1671,6 +1699,33 @@ window.addEventListener('DOMContentLoaded', () => {
   if (window.location.hash === '#setup' || window.location.hash === '#connect') {
     toggleSetupBox(true);
   }
+  // Hydrate Live Feed Spotlight cards dynamically
+  function refreshLiveSpotlight() {
+    fetch('/api/updates?limit=3')
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (!data || !data.updates || !data.updates.length) return;
+        var container = document.getElementById('spotlightCards');
+        if (!container) return;
+        var cardsHtml = data.updates.map(function(u) {
+          var link = u.originalUrl || (u.sources && u.sources[0]) || '#';
+          return '<div class="spotlight-card">' +
+            '<div class="spotlight-header">' +
+              '<span class="spotlight-date">' + (u.date || '') + '</span>' +
+              '<span class="spotlight-badge">' + (u.category || 'Algorithm Update') + '</span>' +
+            '</div>' +
+            '<h3 class="spotlight-title">' +
+              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" style="color:#1e1b24; text-decoration:none;">' + (u.title || '') + '</a>' +
+            '</h3>' +
+            '<p class="spotlight-summary">' + (u.summary || '') + '</p>' +
+          '</div>';
+        }).join('');
+        container.innerHTML = cardsHtml;
+      })
+      .catch(function() {});
+  }
+  refreshLiveSpotlight();
+  setInterval(refreshLiveSpotlight, 60000);
 });
 </script>
 
@@ -1685,6 +1740,7 @@ const entryFile = process.argv[1] ? path.basename(process.argv[1]) : '';
 const isDirectRun = entryFile === 'server.ts' || entryFile === 'server.js';
 
 if (isDirectRun && process.env.NODE_ENV !== 'test') {
+  startPeriodicSync();
   initTelemetry().then(() => {
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Marie Haynes Algo Update MCP Server listening on port ${PORT}`);
