@@ -118,6 +118,12 @@ npm run build
 npm start
 ```
 
+### Deploying to Google Cloud Run
+Deploy the production service to Google Cloud Run:
+```bash
+gcloud run deploy algo-update-mcp --source . --project=mhc-news-portal --region=us-central1 --allow-unauthenticated --session-affinity --min-instances=1 --quiet
+```
+
 ### Environment Variables
 Copy `.env.example` to `.env` to customize settings (all variables are optional for local development):
 ```bash
