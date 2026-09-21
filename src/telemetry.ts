@@ -91,14 +91,14 @@ export async function initTelemetry(force = false): Promise<void> {
           let dailyUsage = { ...(data.dailyUsage || {}) };
 
           // One-time legacy cleanup: prune pre-patch spotlight widget polling
-          if ((byTool.api_updates || 0) > 500) {
+          if ((byTool.api_updates || 0) > 20) {
             const legacyInflated = byTool.api_updates;
             totalCalls = Math.max(0, totalCalls - legacyInflated);
             byTool.api_updates = 0;
             byTransport.api = 0;
             for (const d of ['2026-09-18', '2026-09-19', '2026-09-20', '2026-09-21']) {
-              if (dailyUsage[d] && dailyUsage[d] > 50) {
-                dailyUsage[d] = 2;
+              if (dailyUsage[d] && dailyUsage[d] > 20) {
+                dailyUsage[d] = 3;
               }
             }
             persistStats();

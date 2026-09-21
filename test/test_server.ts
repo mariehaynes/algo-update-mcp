@@ -61,6 +61,18 @@ const server = app.listen(TEST_PORT, '127.0.0.1', async () => {
     assert.strictEqual(postSpotlightCalls, preSpotlightCalls, 'Spotlight source must NOT increment telemetry totalCalls');
     console.log('✅ Spotlight telemetry exclusion verified (calls unchanged)');
 
+    // 4c. Test that browser referer or sec-fetch-site does not increment telemetry
+    const preBrowserStatsStr = await get(`http://127.0.0.1:${TEST_PORT}/api/stats`);
+    const preBrowserCalls = JSON.parse(preBrowserStatsStr).totalCalls;
+    await get(`http://127.0.0.1:${TEST_PORT}/api/updates?limit=3`, {
+      'referer': 'https://algo.mariehaynes.com/',
+      'sec-fetch-site': 'same-origin'
+    });
+    const postBrowserStatsStr = await get(`http://127.0.0.1:${TEST_PORT}/api/stats`);
+    const postBrowserCalls = JSON.parse(postBrowserStatsStr).totalCalls;
+    assert.strictEqual(postBrowserCalls, preBrowserCalls, 'Browser referer/origin must NOT increment telemetry totalCalls');
+    console.log('✅ Browser referer telemetry exclusion verified (calls unchanged)');
+
     // 5. Test REST API /api/stats (Telemetry & Tallies)
     const statsResStr = await get(`http://127.0.0.1:${TEST_PORT}/api/stats`);
     const statsRes = JSON.parse(statsResStr);
@@ -94,9 +106,15 @@ const server = app.listen(TEST_PORT, '127.0.0.1', async () => {
   }
 });
 
-function get(url: string): Promise<string> {
+function get(url: string, headers: Record<string, string> = {}): Promise<string> {
   return new Promise((resolve, reject) => {
-    http.get(url, res => {
+    const parsedUrl = new URL(url);
+    http.get({
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port,
+      path: parsedUrl.pathname + parsedUrl.search,
+      headers
+    }, res => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => resolve(data));

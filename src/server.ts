@@ -409,8 +409,13 @@ app.get('/.well-known/mcp.json', (req, res) => {
 app.get('/api/updates', (req, res) => {
   res.set('Cache-Control', 'public, max-age=60, s-maxage=60');
   const { limit, offset, minRelevance, sortOrder, platform, category, startDate, endDate, query, sortBy, includeHtml, source } = req.query;
-  // Exclude internal spotlight widget refreshes from developer telemetry counts
-  if (source !== 'spotlight' && source !== 'internal') {
+  // Exclude internal spotlight widget refreshes and browser web views from developer telemetry counts
+  const referer = req.get('referer') || '';
+  const secFetchSite = req.get('sec-fetch-site') || '';
+  const isInternalBrowser = secFetchSite === 'same-origin' || referer.includes('mariehaynes.com');
+  const isSpotlightParam = source === 'spotlight' || source === 'internal';
+
+  if (!isSpotlightParam && !isInternalBrowser) {
     recordToolUsage('api_updates', 'api');
   }
   const wantHtml = includeHtml === 'true' || includeHtml === '1';
