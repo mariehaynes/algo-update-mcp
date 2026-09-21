@@ -52,6 +52,15 @@ const server = app.listen(TEST_PORT, '127.0.0.1', async () => {
     assert.ok(apiRes.updates.length === 3, 'Array length must be 3');
     console.log('✅ Endpoint GET /api/updates passed');
 
+    // 4b. Test that source=spotlight does not increment telemetry
+    const preSpotlightStatsStr = await get(`http://127.0.0.1:${TEST_PORT}/api/stats`);
+    const preSpotlightCalls = JSON.parse(preSpotlightStatsStr).totalCalls;
+    await get(`http://127.0.0.1:${TEST_PORT}/api/updates?limit=3&source=spotlight`);
+    const postSpotlightStatsStr = await get(`http://127.0.0.1:${TEST_PORT}/api/stats`);
+    const postSpotlightCalls = JSON.parse(postSpotlightStatsStr).totalCalls;
+    assert.strictEqual(postSpotlightCalls, preSpotlightCalls, 'Spotlight source must NOT increment telemetry totalCalls');
+    console.log('✅ Spotlight telemetry exclusion verified (calls unchanged)');
+
     // 5. Test REST API /api/stats (Telemetry & Tallies)
     const statsResStr = await get(`http://127.0.0.1:${TEST_PORT}/api/stats`);
     const statsRes = JSON.parse(statsResStr);

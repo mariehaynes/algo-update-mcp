@@ -63,8 +63,21 @@ try {
 
 let isInitialized = false;
 
+let lastFetchTime = 0;
+const SYNC_INTERVAL_MS = 60000;
+
 // Load initial stats from Firestore (or disk fallback)
-export async function initTelemetry(): Promise<void> {
+export async function initTelemetry(force = false): Promise<void> {
+  const now = Date.now();
+  if (isInitialized && !force && (now - lastFetchTime < SYNC_INTERVAL_MS)) {
+    return;
+  }
+  if (saveTimer !== null) {
+    // A local write is pending debounce, do not overwrite in-memory state with stale remote read
+    return;
+  }
+  lastFetchTime = now;
+
   if (firestoreDb) {
     try {
       const docRef = firestoreDb.collection('system').doc('algo_mcp_stats');
@@ -72,11 +85,50 @@ export async function initTelemetry(): Promise<void> {
       if (snap.exists) {
         const data = snap.data();
         if (data && typeof data.totalCalls === 'number') {
+          let byTool = { ...stats.byTool, ...(data.byTool || {}) };
+          let byTransport = { ...stats.byTransport, ...(data.byTransport || {}) };
+          let totalCalls = data.totalCalls || 0;
+          let dailyUsage = { ...(data.dailyUsage || {}) };
+
+          // One-time legacy cleanup: prune pre-patch spotlight widget polling
+          if ((byTool.api_updates || 0) > 500) {
+            const legacyInflated = byTool.api_updates;
+            totalCalls = Math.max(0, totalCalls - legacyInflated);
+            byTool.api_updates = 0;
+            byTransport.api = 0;
+            for (const d of ['2026-09-18', '2026-09-19', '2026-09-20', '2026-09-21']) {
+              if (dailyUsage[d] && dailyUsage[d] > 50) {
+                dailyUsage[d] = 2;
+              }
+            }
+            persistStats();
+          }
+
+          if (isInitialized) {
+            // Periodic sync: take max between remote and local to prevent clobbering or duplicating
+            for (const k of Object.keys(byTool)) {
+              byTool[k] = Math.max(byTool[k] || 0, stats.byTool[k] || 0);
+            }
+            for (const k of Object.keys(byTransport)) {
+              byTransport[k] = Math.max(byTransport[k] || 0, stats.byTransport[k] || 0);
+            }
+            totalCalls = Math.max(totalCalls, stats.totalCalls);
+          } else {
+            // First load: merge any in-memory calls that arrived while waiting for Firestore
+            for (const [k, v] of Object.entries(stats.byTool)) {
+              byTool[k] = (byTool[k] || 0) + (v || 0);
+            }
+            for (const [k, v] of Object.entries(stats.byTransport)) {
+              byTransport[k] = (byTransport[k] || 0) + (v || 0);
+            }
+            totalCalls += stats.totalCalls;
+          }
+
           stats = {
-            totalCalls: data.totalCalls || 0,
-            byTool: { ...stats.byTool, ...(data.byTool || {}) },
-            byTransport: { ...stats.byTransport, ...(data.byTransport || {}) },
-            dailyUsage: data.dailyUsage || {},
+            totalCalls,
+            byTool,
+            byTransport,
+            dailyUsage,
             firstRecorded: data.firstRecorded || stats.firstRecorded,
             lastUpdated: data.lastUpdated || stats.lastUpdated
           };

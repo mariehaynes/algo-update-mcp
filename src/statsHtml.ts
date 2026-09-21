@@ -20,7 +20,7 @@ export function renderStatsHtml(stats: UsageStats): string {
     },
     api_updates: {
       label: 'REST API (/api/updates)',
-      desc: 'Direct public JSON developer feed requests'
+      desc: 'Direct developer feed requests (excludes internal web views)'
     }
   };
 
@@ -35,7 +35,7 @@ export function renderStatsHtml(stats: UsageStats): string {
     },
     api: {
       label: 'Direct REST API',
-      desc: 'HTTP GET queries to /api/updates and /updates.json'
+      desc: 'Direct developer queries to /api/updates (excludes web views)'
     },
     stdio: {
       label: 'Local Stdio',

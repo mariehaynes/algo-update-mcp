@@ -408,8 +408,11 @@ app.get('/.well-known/mcp.json', (req, res) => {
 // ----------------------------------------------------
 app.get('/api/updates', (req, res) => {
   res.set('Cache-Control', 'public, max-age=60, s-maxage=60');
-  recordToolUsage('api_updates', 'api');
-  const { limit, offset, minRelevance, sortOrder, platform, category, startDate, endDate, query, sortBy, includeHtml } = req.query;
+  const { limit, offset, minRelevance, sortOrder, platform, category, startDate, endDate, query, sortBy, includeHtml, source } = req.query;
+  // Exclude internal spotlight widget refreshes from developer telemetry counts
+  if (source !== 'spotlight' && source !== 'internal') {
+    recordToolUsage('api_updates', 'api');
+  }
   const wantHtml = includeHtml === 'true' || includeHtml === '1';
 
   if (query) {
@@ -1702,9 +1705,9 @@ window.addEventListener('DOMContentLoaded', () => {
   if (window.location.hash === '#setup' || window.location.hash === '#connect') {
     toggleSetupBox(true);
   }
-  // Hydrate Live Feed Spotlight cards dynamically
+  // Hydrate Live Feed Spotlight cards dynamically (source=spotlight excludes from API telemetry)
   function refreshLiveSpotlight() {
-    fetch('/api/updates?limit=3')
+    fetch('/api/updates?limit=3&source=spotlight')
       .then(function(res) { return res.json(); })
       .then(function(data) {
         if (!data || !data.updates || !data.updates.length) return;
